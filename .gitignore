@@ -1,0 +1,7 @@
+*.dll
+*.exe
+/bin
+/obj
+appsettings.Development.json
+Properties/serviceDependencies.local.json
+Properties/serviceDependencies.local.json.user

@@ -1,0 +1,19 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Ensure consistent line endings for C# files
+*.cs text eol=lf
+
+# Ensure consistent line endings for JSON files
+*.json text eol=lf
+
+# Ensure consistent line endings for Docker files
+Dockerfile text eol=lf
+docker-compose* text eol=lf
+
+# Binary files should not be modified
+*.png binary
+*.jpg binary
+*.gif binary
+*.exe binary
+*.dll binary
