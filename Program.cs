@@ -1,11 +1,13 @@
+using EventFlow_API.Config;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+AppConfiguration.ConfigureMvc(builder);
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContextConfig(builder.Configuration);
+builder.Services.AddDependencyInjectionConfig();
 
 var app = builder.Build();
 
