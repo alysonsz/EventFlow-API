@@ -8,5 +8,5 @@ public class Participant
     public required string Name { get; set; }
     public required string Email { get; set; }
     public int EventId { get; set; }
-    public ICollection<Event>? Events { get; set; } = new Collection<Event>();
+    public ICollection<Event>? Events { get; set; } = [];
 }

@@ -11,6 +11,6 @@ public class Event
     public required string Location { get; set; }
     public Organizer Organizer { get; set; }
     public int OrganizerId { get; set; }
-    public ICollection<Speaker> Speakers { get; set; } = new Collection<Speaker>();
-    public ICollection<Participant> Participants { get; set; } = new Collection<Participant>();
+    public ICollection<Speaker> Speakers { get; set; } = [];
+    public ICollection<Participant> Participants { get; set; } = [];
 }

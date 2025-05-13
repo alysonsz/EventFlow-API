@@ -1,5 +1,4 @@
-﻿using EventFlow_API.Data;
-using EventFlow_API.Models;
+﻿using EventFlow_API.Models;
 using EventFlow_API.Repository.Interfaces;
 
 namespace EventFlow_API.Repository;
@@ -41,6 +40,6 @@ public class EventRepository(EventFlowContext context) : IEventRepository
     public async Task<List<Event>> GetAllEventsAsync()
     {
         return await context.Event
-            .ToListAsync() ?? new List<Event>();
+            .ToListAsync() ?? [];
     }
 }
