@@ -6,7 +6,7 @@ public interface IParticipantRepository
 {
     Task<Participant> PostAsync(Participant participant);
     Task<Participant> UpdateAsync(Participant participant);
-    Task<Participant> DeleteAsync(Participant participant);
-    Task<Participant?> GetParticipantByIdAsync(int Id);
-    Task<List<Participant>> GetAllParticipantsAsync(int Id);
+    Task<int> DeleteAsync(int id);
+    Task<Participant?> GetParticipantByIdAsync(int id);
+    Task<List<Participant>> GetAllParticipantsAsync();
 }

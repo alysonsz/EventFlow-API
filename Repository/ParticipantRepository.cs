@@ -1,5 +1,4 @@
-﻿using EventFlow_API.Data;
-using EventFlow_API.Models;
+﻿using EventFlow_API.Models;
 using EventFlow_API.Repository.Interfaces;
 
 namespace EventFlow_API.Repository;
@@ -20,11 +19,15 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
         return participant;
     }
 
-    public async Task<Participant> DeleteAsync(Participant participant)
+    public async Task<int> DeleteAsync(int id)
     {
-        context.Participant.Remove(participant);
-        await context.SaveChangesAsync();
-        return participant;
+        var participantToDelete = await context.Participant.FindAsync(id);
+        if (participantToDelete != null)
+        {
+            context.Participant.Remove(participantToDelete);
+            await context.SaveChangesAsync();
+        }
+        return id;
     }
 
     public async Task<Participant?> GetParticipantByIdAsync(int id)
@@ -33,10 +36,9 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<List<Participant>> GetAllParticipantsAsync(int id)
+    public async Task<List<Participant>> GetAllParticipantsAsync()
     {
         return await context.Participant
-            .Where(p => p.Id == id)
-            .ToListAsync() ?? new List<Participant>();
+            .ToListAsync() ?? [];
     }
 }
