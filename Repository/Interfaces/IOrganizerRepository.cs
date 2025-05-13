@@ -6,7 +6,7 @@ public interface IOrganizerRepository
 {
     Task<Organizer> PostAsync(Organizer organizer);
     Task<Organizer> UpdateAsync(Organizer organizer);
-    Task<Organizer> DeleteAsync(Organizer organizer);
-    Task<Organizer?> GetOrganizerByIdAsync(int Id);
-    Task<List<Organizer>> GetAllOrganizersAsync(int Id);
+    Task<int> DeleteAsync(int id);
+    Task<Organizer?> GetOrganizerByIdAsync(int id);
+    Task<List<Organizer>> GetAllOrganizersAsync();
 }

@@ -1,5 +1,4 @@
-﻿using EventFlow_API.Data;
-using EventFlow_API.Models;
+﻿using EventFlow_API.Models;
 using EventFlow_API.Repository.Interfaces;
 
 namespace EventFlow_API.Repository;
@@ -20,11 +19,15 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
         return organizer;
     }
 
-    public async Task<Organizer> DeleteAsync(Organizer organizer)
+    public async Task<int> DeleteAsync(int id)
     {
-        context.Organizer.Remove(organizer);
-        await context.SaveChangesAsync();
-        return organizer;
+        var organizerToDelete = await context.Organizer.FindAsync(id);
+        if (organizerToDelete != null)
+        {
+            context.Organizer.Remove(organizerToDelete);
+            await context.SaveChangesAsync();
+        }
+        return id;
     }
 
     public async Task<Organizer?> GetOrganizerByIdAsync(int id)
@@ -33,10 +36,9 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
-    public async Task<List<Organizer>> GetAllOrganizersAsync(int id)
+    public async Task<List<Organizer>> GetAllOrganizersAsync()
     {
         return await context.Organizer
-            .Where(o => o.Id == id)
-            .ToListAsync() ?? new List<Organizer>();
+            .ToListAsync() ?? [];
     }
 }
