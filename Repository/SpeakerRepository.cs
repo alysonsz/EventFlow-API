@@ -1,5 +1,4 @@
-﻿using EventFlow_API.Data;
-using EventFlow_API.Models;
+﻿using EventFlow_API.Models;
 using EventFlow_API.Repository.Interfaces;
 
 namespace EventFlow_API.Repository;
@@ -20,11 +19,15 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
         return speaker;
     }
 
-    public async Task<Speaker> DeleteAsync(Speaker speaker)
+    public async Task<int> DeleteAsync(int id)
     {
-        context.Speaker.Remove(speaker);
-        await context.SaveChangesAsync();
-        return speaker;
+        var speakerToDelete = await context.Speaker.FindAsync(id);
+        if (speakerToDelete != null)
+        {
+            context.Speaker.Remove(speakerToDelete);
+            await context.SaveChangesAsync();
+        }
+        return id;
     }
 
     public async Task<Speaker?> GetSpeakerByIdAsync(int id)
@@ -33,10 +36,9 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<List<Speaker>> GetAllSpeakersAsync(int id)
+    public async Task<List<Speaker>> GetAllSpeakersAsync()
     {
         return await context.Speaker
-            .Where(s => s.Id == id)
-            .ToListAsync() ?? new List<Speaker>();
+            .ToListAsync() ?? [];
     }
 }
