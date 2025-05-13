@@ -23,7 +23,9 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
                 Biography = speakerCommand.Biography,
                 EventId = speakerCommand.EventId
             };
+
             var create = await speakerRepository.PostAsync(speaker);
+
             if (create != null)
                 return Ok(create);
 
@@ -47,11 +49,13 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
         }
     }
 
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateAsync([FromBody] SpeakerCommand speakerCommand)
+    [HttpPut("update/{id:int}")]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] SpeakerCommand speakerCommand)
     {
         try
         {
+            var speakerId = await speakerRepository.GetSpeakerByIdAsync(id);
+
             var speaker = new Speaker
             {
                 Name = speakerCommand.Name,
@@ -59,12 +63,14 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
                 Biography = speakerCommand.Biography,
                 EventId = speakerCommand.EventId
             };
+
             var update = await speakerRepository.UpdateAsync(speaker);
+
             if (update != null)
                 return Ok(update);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -83,24 +89,17 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
         }
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteAsync([FromBody] SpeakerCommand speakerCommand)
+    [HttpDelete("delete/{id:int}")]
+    public async Task<IActionResult> DeleteAsync(int id)
     {
         try
         {
-            var speaker = new Speaker
-            {
-                Name = speakerCommand.Name,
-                Email = speakerCommand.Email,
-                Biography = speakerCommand.Biography,
-                EventId = speakerCommand.EventId
-            };
-            var delete = await speakerRepository.DeleteAsync(speaker);
-            if (delete != null)
-                return Ok(delete);
+            var delete = await speakerRepository.DeleteAsync(id);
 
+            if (delete > 0)
+                return Ok(delete);
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -125,11 +124,12 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
         try
         {
             var result = await speakerRepository.GetSpeakerByIdAsync(id);
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -148,17 +148,18 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
         }
     }
 
-    [HttpGet("all/{id:int}")]
-    public async Task<IActionResult> GetAllSpeakersAsync(int id)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllSpeakersAsync()
     {
         try
         {
-            var result = await speakerRepository.GetAllSpeakersAsync(id);
+            var result = await speakerRepository.GetAllSpeakersAsync();
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {

@@ -46,23 +46,26 @@ public class ParticipantController(IParticipantRepository participantRepository)
         }
     }
 
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateAsync([FromBody] ParticipantCommand participantCommand)
+    [HttpPut("update/{id:int}")]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] ParticipantCommand participantCommand)
     {
         try
         {
+            var participantId = await participantRepository.GetParticipantByIdAsync(id);
             var participant = new Participant
             {
                 Name = participantCommand.Name,
                 Email = participantCommand.Email,
                 EventId = participantCommand.EventId
             };
+
             var update = await participantRepository.UpdateAsync(participant);
+
             if (update != null)
                 return Ok(update);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -81,23 +84,17 @@ public class ParticipantController(IParticipantRepository participantRepository)
         }
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteAsync([FromBody] ParticipantCommand participantCommand)
+    [HttpDelete("delete/{id:int}")]
+    public async Task<IActionResult> DeleteAsync(int id)
     {
         try
         {
-            var participant = new Participant
-            {
-                Name = participantCommand.Name,
-                Email = participantCommand.Email,
-                EventId = participantCommand.EventId
-            };
-            var delete = await participantRepository.DeleteAsync(participant);
-            if (delete != null)
+            var delete = await participantRepository.DeleteAsync(id);
+            if (delete > 0)
                 return Ok(delete);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -126,7 +123,7 @@ public class ParticipantController(IParticipantRepository participantRepository)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -145,17 +142,17 @@ public class ParticipantController(IParticipantRepository participantRepository)
         }
     }
 
-    [HttpGet("all/{id:int}")]
-    public async Task<IActionResult> GetAllParticipantsAsync(int id)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllParticipantsAsync()
     {
         try
         {
-            var result = await participantRepository.GetAllParticipantsAsync(id);
+            var result = await participantRepository.GetAllParticipantsAsync();
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {

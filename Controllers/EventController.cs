@@ -27,7 +27,9 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
                 Speakers = eventCommand.Speakers,
                 Participants = eventCommand.Participants
             };
+
             var create = await eventRepository.PostAsync(eventModel);
+
             if (create != null)
                 return Ok(create);
 
@@ -58,6 +60,7 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
         try
         {
             var eventId = await eventRepository.GetEventByIdAsync(id);
+
             var eventModel = new Event
             {
                 Id = id,
@@ -70,12 +73,14 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
                 Speakers = eventCommand.Speakers,
                 Participants = eventCommand.Participants
             };
+
             var update = await eventRepository.UpdateAsync(eventModel);
+
             if (update != null)
                 return Ok(update);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -100,11 +105,12 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
         try
         {
             var delete = await eventRepository.DeleteAsync(id);
-            if (delete != null)
+
+            if (delete > 0)
                 return Ok(delete);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -129,11 +135,12 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
         try
         {
             var result = await eventRepository.GetEventByIdAsync(id);
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -158,11 +165,12 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
         try
         {
             var result = await eventRepository.GetAllEventsAsync();
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {

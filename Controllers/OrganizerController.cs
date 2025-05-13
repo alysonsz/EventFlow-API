@@ -21,7 +21,9 @@ public class OrganizerController(IOrganizerRepository organizerRepository) : Con
                 Name = organizerCommand.Name,
                 Email = organizerCommand.Email
             };
+
             var create = await organizerRepository.PostAsync(organizer);
+
             if (create != null)
                 return Ok(create);
 
@@ -45,22 +47,25 @@ public class OrganizerController(IOrganizerRepository organizerRepository) : Con
         }
     }
 
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateAsync([FromBody] OrganizerCommand organizerCommand)
+    [HttpPut("update/{id:int}")]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] OrganizerCommand organizerCommand)
     {
         try
         {
+            var organizerId = await organizerRepository.GetOrganizerByIdAsync(id);
             var organizer = new Organizer
             {
                 Name = organizerCommand.Name,
                 Email = organizerCommand.Email
             };
+
             var update = await organizerRepository.UpdateAsync(organizer);
+
             if (update != null)
                 return Ok(update);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -79,22 +84,18 @@ public class OrganizerController(IOrganizerRepository organizerRepository) : Con
         }
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteAsync([FromBody] OrganizerCommand organizerCommand)
+    [HttpDelete("delete/{id:int}")]
+    public async Task<IActionResult> DeleteAsync(int id)
     {
         try
         {
-            var organizer = new Organizer
-            {
-                Name = organizerCommand.Name,
-                Email = organizerCommand.Email
-            };
-            var delete = await organizerRepository.DeleteAsync(organizer);
-            if (delete != null)
+            var delete = await organizerRepository.DeleteAsync(id);
+
+            if (delete > 0)
                 return Ok(delete);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -119,11 +120,12 @@ public class OrganizerController(IOrganizerRepository organizerRepository) : Con
         try
         {
             var result = await organizerRepository.GetOrganizerByIdAsync(id);
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
@@ -142,17 +144,18 @@ public class OrganizerController(IOrganizerRepository organizerRepository) : Con
         }
     }
 
-    [HttpGet("all/{id:int}")]
-    public async Task<IActionResult> GetAllOrganizersAsync(int id)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllOrganizersAsync()
     {
         try
         {
-            var result = await organizerRepository.GetAllOrganizersAsync(id);
+            var result = await organizerRepository.GetAllOrganizersAsync();
+
             if (result != null)
                 return Ok(result);
 
             else
-                return BadRequest();
+                return NotFound();
         }
         catch (SqlException error)
         {
