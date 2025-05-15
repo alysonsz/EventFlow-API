@@ -37,6 +37,15 @@ public class EventRepository(EventFlowContext context) : IEventRepository
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
+    public async Task<Event?> GetEventWithDetailsByIdAsync(int id)
+    {
+        return await context.Event
+            .Include(e => e.Organizer)
+            .Include(e => e.Speakers)
+            .Include(e => e.Participants)
+            .FirstOrDefaultAsync(e => e.Id == id);
+    }
+
     public async Task<List<Event>> GetAllEventsAsync()
     {
         return await context.Event

@@ -8,5 +8,6 @@ public interface IEventRepository
     Task<Event> UpdateAsync(Event @event);
     Task<int> DeleteAsync(int id);
     Task<Event?> GetEventByIdAsync(int id);
+    Task<Event?> GetEventWithDetailsByIdAsync(int id);
     Task<List<Event>> GetAllEventsAsync();
 }

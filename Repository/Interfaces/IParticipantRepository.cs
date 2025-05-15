@@ -8,5 +8,5 @@ public interface IParticipantRepository
     Task<Participant> UpdateAsync(Participant participant);
     Task<int> DeleteAsync(int id);
     Task<Participant?> GetParticipantByIdAsync(int id);
-    Task<List<Participant>> GetAllParticipantsAsync();
+    Task<List<Participant>> GetAllParticipantsByEventIdAsync(int eventId);
 }

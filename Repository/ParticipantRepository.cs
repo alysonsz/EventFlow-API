@@ -36,9 +36,10 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<List<Participant>> GetAllParticipantsAsync()
+    public async Task<List<Participant>> GetAllParticipantsByEventIdAsync(int eventId)
     {
         return await context.Participant
-            .ToListAsync() ?? [];
+        .Where(p => p.Events!.Any(e => e.Id == eventId))
+        .ToListAsync() ?? [];
     }
 }
