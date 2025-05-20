@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace EventFlow_API.Models;
+﻿namespace EventFlow_API.Models;
 
 public class Event
 {
@@ -12,5 +10,6 @@ public class Event
     public Organizer Organizer { get; set; }
     public int OrganizerId { get; set; }
     public ICollection<Speaker> Speakers { get; set; } = [];
+    public int SpeakerId { get; set; }
     public ICollection<Participant> Participants { get; set; } = [];
 }
