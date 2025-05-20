@@ -1,6 +1,6 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Models;
-using EventFlow_API.Repository.Interfaces;
+using EventFlow_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -8,7 +8,7 @@ namespace EventFlow_API.Controllers;
 
 [Route("participant")]
 [ApiController]
-public class ParticipantController(IParticipantRepository participantRepository) : ControllerBase
+public class ParticipantController(IParticipantService participantService) : ControllerBase
 {
 
     [HttpPost]
@@ -16,18 +16,11 @@ public class ParticipantController(IParticipantRepository participantRepository)
     {
         try
         {
-            var participant = new Participant
-            {
-                Name = participantCommand.Name,
-                Email = participantCommand.Email,
-                EventId = participantCommand.EventId
-            };
-            var create = await participantRepository.PostAsync(participant);
-            if (create != null)
-                return Ok(create);
+            var participant = await participantService.CreateAsync(participantCommand);
 
-            else
-                return BadRequest();
+            return participant != null ? 
+                Ok(participant) : 
+                BadRequest();
         }
         catch (SqlException error)
         {
@@ -51,21 +44,10 @@ public class ParticipantController(IParticipantRepository participantRepository)
     {
         try
         {
-            var participantId = await participantRepository.GetParticipantByIdAsync(id);
-            var participant = new Participant
-            {
-                Name = participantCommand.Name,
-                Email = participantCommand.Email,
-                EventId = participantCommand.EventId
-            };
-
-            var update = await participantRepository.UpdateAsync(participant);
-
-            if (update != null)
-                return Ok(update);
-
-            else
-                return NotFound();
+            var updated = await participantService.UpdateAsync(id, participantCommand);
+            return updated != null ? 
+                Ok(updated) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -89,12 +71,10 @@ public class ParticipantController(IParticipantRepository participantRepository)
     {
         try
         {
-            var delete = await participantRepository.DeleteAsync(id);
-            if (delete > 0)
-                return Ok(delete);
-
-            else
-                return NotFound();
+            var deleted = await participantService.DeleteAsync(id);
+            return deleted ? 
+                Ok(id) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -118,12 +98,10 @@ public class ParticipantController(IParticipantRepository participantRepository)
     {
         try
         {
-            var result = await participantRepository.GetParticipantByIdAsync(id);
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await participantService.GetByIdAsync(id);
+            return result != null ? 
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -143,16 +121,14 @@ public class ParticipantController(IParticipantRepository participantRepository)
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllParticipantsAsync()
+    public async Task<IActionResult> GetAllParticipantsAsync(int eventId)
     {
         try
         {
-            var result = await participantRepository.GetAllParticipantsAsync();
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await participantService.GetAllAsync(eventId);
+            return result.Count != 0 ? 
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
