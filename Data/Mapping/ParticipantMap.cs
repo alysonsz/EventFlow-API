@@ -29,7 +29,22 @@ public class ParticipantMap : IEntityTypeConfiguration<Participant>
         builder
             .HasMany(p => p.Events)
             .WithMany(e => e.Participants)
-            .UsingEntity("EventParticipant");
+            .UsingEntity<Dictionary<string, object>>("EventParticipant",
+            right => right
+              .HasOne<Event>()
+              .WithMany()
+              .HasForeignKey("EventId")
+              .HasConstraintName("FK_EventParticipant_Event"),
+            left => left
+              .HasOne<Participant>()
+              .WithMany()
+              .HasForeignKey("ParticipantId")
+              .HasConstraintName("FK_EventParticipant_Participant"),
+            join =>
+            {
+                join.ToTable("EventParticipant");
+                join.HasKey("EventId", "ParticipantId");
+            });
     }
 }
 
