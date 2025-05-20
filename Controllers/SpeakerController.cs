@@ -1,6 +1,6 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Models;
-using EventFlow_API.Repository.Interfaces;
+using EventFlow_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -8,7 +8,7 @@ namespace EventFlow_API.Controllers;
 
 [Route("speaker")]
 [ApiController]
-public class SpeakerController(ISpeakerRepository speakerRepository) : ControllerBase
+public class SpeakerController(ISpeakerService speakerService) : ControllerBase
 {
 
     [HttpPost]
@@ -16,21 +16,11 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
     {
         try
         {
-            var speaker = new Speaker
-            {
-                Name = speakerCommand.Name,
-                Email = speakerCommand.Email,
-                Biography = speakerCommand.Biography,
-                EventId = speakerCommand.EventId
-            };
+            var speaker = await speakerService.CreateAsync(speakerCommand);
 
-            var create = await speakerRepository.PostAsync(speaker);
-
-            if (create != null)
-                return Ok(create);
-
-            else
-                return BadRequest();
+            return speaker != null ? 
+                Ok(speaker) : 
+                BadRequest();
         }
         catch (SqlException error)
         {
@@ -54,23 +44,10 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
     {
         try
         {
-            var speakerId = await speakerRepository.GetSpeakerByIdAsync(id);
-
-            var speaker = new Speaker
-            {
-                Name = speakerCommand.Name,
-                Email = speakerCommand.Email,
-                Biography = speakerCommand.Biography,
-                EventId = speakerCommand.EventId
-            };
-
-            var update = await speakerRepository.UpdateAsync(speaker);
-
-            if (update != null)
-                return Ok(update);
-
-            else
-                return NotFound();
+            var updated = await speakerService.UpdateAsync(id, speakerCommand);
+            return updated != null ? 
+                Ok(updated) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -94,12 +71,10 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
     {
         try
         {
-            var delete = await speakerRepository.DeleteAsync(id);
-
-            if (delete > 0)
-                return Ok(delete);
-            else
-                return NotFound();
+            var deleted = await speakerService.DeleteAsync(id);
+            return deleted ? 
+                Ok(id) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -123,13 +98,10 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
     {
         try
         {
-            var result = await speakerRepository.GetSpeakerByIdAsync(id);
-
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await speakerService.GetByIdAsync(id);
+            return result != null ?
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -153,13 +125,10 @@ public class SpeakerController(ISpeakerRepository speakerRepository) : Controlle
     {
         try
         {
-            var result = await speakerRepository.GetAllSpeakersAsync();
-
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await speakerService.GetAllAsync();
+            return result.Count != 0 ?
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
