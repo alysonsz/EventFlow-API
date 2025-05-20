@@ -1,6 +1,8 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Models;
 using EventFlow_API.Repository.Interfaces;
+using EventFlow_API.Services;
+using EventFlow_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -8,34 +10,18 @@ namespace EventFlow_API.Controllers;
 
 [Route("event")]
 [ApiController]
-public class EventController(IEventRepository eventRepository) : ControllerBase
+public class EventController(IEventService eventService) : ControllerBase
 {
-
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] EventCommand eventCommand)
     {
         try
         {
-            var eventModel = new Event
-            {
-                Title = eventCommand.Title,
-                Location = eventCommand.Location,
-                Organizer = eventCommand.Organizer,
-                Description = eventCommand.Description,
-                Date = eventCommand.Date,
-                OrganizerId = eventCommand.OrganizerId,
-                Speakers = eventCommand.Speakers,
-                Participants = eventCommand.Participants
-            };
+            var newEvent = await eventService.CreateAsync(eventCommand);
 
-            var create = await eventRepository.PostAsync(eventModel);
-
-            if (create != null)
-                return Ok(create);
-
-            else
-                return BadRequest();
-
+            return newEvent != null ? 
+                Ok(newEvent) : 
+                BadRequest();
         }
         catch (SqlException error)
         {
@@ -59,28 +45,10 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
     {
         try
         {
-            var eventId = await eventRepository.GetEventByIdAsync(id);
-
-            var eventModel = new Event
-            {
-                Id = id,
-                Title = eventCommand.Title,
-                Location = eventCommand.Location,
-                Organizer = eventCommand.Organizer,
-                Description = eventCommand.Description,
-                Date = eventCommand.Date,
-                OrganizerId = eventCommand.OrganizerId,
-                Speakers = eventCommand.Speakers,
-                Participants = eventCommand.Participants
-            };
-
-            var update = await eventRepository.UpdateAsync(eventModel);
-
-            if (update != null)
-                return Ok(update);
-
-            else
-                return NotFound();
+            var updated = await eventService.UpdateAsync(id, eventCommand);
+            return updated != null ? 
+                Ok(updated) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -104,13 +72,10 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
     {
         try
         {
-            var delete = await eventRepository.DeleteAsync(id);
-
-            if (delete > 0)
-                return Ok(delete);
-
-            else
-                return NotFound();
+            var deleted = await eventService.DeleteAsync(id);
+            return deleted ? 
+                Ok(id) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -134,13 +99,10 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
     {
         try
         {
-            var result = await eventRepository.GetEventByIdAsync(id);
-
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await eventService.GetByIdAsync(id);
+            return result != null ? 
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
@@ -164,13 +126,10 @@ public class EventController(IEventRepository eventRepository) : ControllerBase
     {
         try
         {
-            var result = await eventRepository.GetAllEventsAsync();
-
-            if (result != null)
-                return Ok(result);
-
-            else
-                return NotFound();
+            var result = await eventService.GetAllAsync();
+            return result.Count != 0 ? 
+                Ok(result) : 
+                NotFound();
         }
         catch (SqlException error)
         {
