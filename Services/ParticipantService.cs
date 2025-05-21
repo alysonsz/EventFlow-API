@@ -5,7 +5,7 @@ using EventFlow_API.Services.Interfaces;
 
 namespace EventFlow_API.Services;
 
-public class ParticipantService(IParticipantRepository repository) : IParticipantService
+public class ParticipantService(IParticipantRepository repository, EventFlowContext context) : IParticipantService
 {
     public async Task<Participant?> GetByIdAsync(int id)
         => await repository.GetParticipantByIdAsync(id);
@@ -21,13 +21,18 @@ public class ParticipantService(IParticipantRepository repository) : IParticipan
             Email = command.Email
         };
 
+        var eventEntity = await context.Event.FindAsync(command.EventId);
+        participant.Events = new List<Event> { eventEntity! };
+
         return await repository.PostAsync(participant);
     }
 
     public async Task<Participant?> UpdateAsync(int id, ParticipantCommand command)
     {
         var existing = await repository.GetParticipantByIdAsync(id);
-        if (existing == null) return null;
+
+        if (existing == null) 
+            return null;
 
         existing.Name = command.Name;
         existing.Email = command.Email;

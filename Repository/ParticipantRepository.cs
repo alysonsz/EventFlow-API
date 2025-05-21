@@ -22,17 +22,20 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
     public async Task<int> DeleteAsync(int id)
     {
         var participantToDelete = await context.Participant.FindAsync(id);
+
         if (participantToDelete != null)
         {
             context.Participant.Remove(participantToDelete);
             await context.SaveChangesAsync();
         }
+
         return id;
     }
 
     public async Task<Participant?> GetParticipantByIdAsync(int id)
     {
         return await context.Participant
+            .Include(p => p.Events!)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
