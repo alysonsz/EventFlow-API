@@ -8,7 +8,7 @@ namespace EventFlow_API.Services;
 public class EventService(IEventRepository repository) : IEventService
 {
     public async Task<Event?> GetByIdAsync(int id)
-        => await repository.GetEventByIdAsync(id);
+        => await repository.GetEventWithDetailsByIdAsync(id);
 
     public async Task<List<Event>> GetAllAsync()
         => await repository.GetAllEventsAsync();
