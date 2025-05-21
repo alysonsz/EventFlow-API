@@ -33,6 +33,10 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
     public async Task<Organizer?> GetOrganizerByIdAsync(int id)
     {
         return await context.Organizer
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.Speakers!)
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.Participants)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 

@@ -33,6 +33,8 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
     public async Task<Speaker?> GetSpeakerByIdAsync(int id)
     {
         return await context.Speaker
+            .Include(s => s.Event)
+            .ThenInclude(e => e.Organizer)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
