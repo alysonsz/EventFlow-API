@@ -12,6 +12,7 @@ public class EventFlowContext : DbContext
     public DbSet<Organizer> Organizer { get; set; } = null!;
     public DbSet<Participant> Participant { get; set; } = null!;
     public DbSet<Speaker> Speaker { get; set; } = null!;
+    public DbSet<SpeakerEvent> SpeakerEvents { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -19,5 +20,6 @@ public class EventFlowContext : DbContext
         builder.ApplyConfiguration(new OrganizerMap());
         builder.ApplyConfiguration(new ParticipantMap());
         builder.ApplyConfiguration(new SpeakerMap());
+        builder.ApplyConfiguration(new SpeakerEventMap());
     }
 }
