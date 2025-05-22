@@ -2,16 +2,26 @@
 using EventFlow_API.Models;
 using EventFlow_API.Commands;
 using EventFlow_API.Repository.Interfaces;
+using AutoMapper;
+using EventFlow_API.Models.DTOs;
 
 namespace EventFlow_API.Services;
 
-public class SpeakerService(ISpeakerRepository repository) : ISpeakerService
+public class SpeakerService(ISpeakerRepository repository, IEventRepository eventRepository, EventFlowContext context, IMapper mapper) : ISpeakerService
 {
-    public async Task<Speaker?> GetByIdAsync(int id)
-        => await repository.GetSpeakerByIdAsync(id);
+    public async Task<SpeakerDTO?> GetByIdAsync(int id)
+    {
+        var entity = await repository.GetSpeakerByIdAsync(id);
+        return entity is null ? 
+            null : 
+            mapper.Map<SpeakerDTO>(entity);
+    }
 
-    public async Task<List<Speaker>> GetAllAsync()
-        => await repository.GetAllSpeakersAsync();
+    public async Task<List<SpeakerDTO>> GetAllAsync()
+    {
+        var speakers = await repository.GetAllSpeakersAsync();
+        return mapper.Map<List<SpeakerDTO>>(speakers);
+    }
 
     public async Task<Speaker?> CreateAsync(SpeakerCommand command)
     {
@@ -19,14 +29,36 @@ public class SpeakerService(ISpeakerRepository repository) : ISpeakerService
         {
             Name = command.Name,
             Email = command.Email,
-            Biography = command.Biography,
-            EventId = command.EventId
+            Biography = command.Biography
         };
 
         return await repository.PostAsync(speaker);
     }
+    public async Task<bool> RegisterToEventAsync(int eventId, int speakerId)
+    {
+        var speaker = await repository.GetSpeakerByIdAsync(speakerId);
+        var evento = await eventRepository.GetEventByIdAsync(eventId);
 
-    public async Task<Speaker?> UpdateAsync(int id, SpeakerCommand command)
+        if (speaker == null || evento == null)
+            return false;
+
+        var alreadyLinked = speaker.SpeakerEvents.Any(se => se.EventId == eventId);
+        if (alreadyLinked)
+            return true;
+        var speakerEvent = new SpeakerEvent
+        {
+            SpeakerId = speakerId,
+            EventId = eventId,
+            RegisteredAt = DateTime.UtcNow
+        };
+
+        await context.SpeakerEvents.AddAsync(speakerEvent);
+        await context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<SpeakerDTO?> UpdateAsync(int id, SpeakerCommand command)
     {
         var existing = await repository.GetSpeakerByIdAsync(id);
         if (existing == null) return null;
@@ -34,9 +66,11 @@ public class SpeakerService(ISpeakerRepository repository) : ISpeakerService
         existing.Name = command.Name;
         existing.Email = command.Email;
         existing.Biography = command.Biography;
-        existing.EventId = command.EventId;
 
-        return await repository.UpdateAsync(existing);
+        var updated = await repository.UpdateAsync(existing);
+        return updated is null ?
+           null : 
+           mapper.Map<SpeakerDTO>(updated);
     }
 
     public async Task<bool> DeleteAsync(int id)
