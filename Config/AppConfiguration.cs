@@ -8,6 +8,7 @@ using EventFlow_API.Helpers;
 using EventFlow_API.Validators;
 using FluentValidation.AspNetCore;
 using System.Text.Json.Serialization;
+using EventFlow_API.Profiles;
 
 namespace EventFlow_API.Config;
 
@@ -52,16 +53,14 @@ public static class AppConfiguration
 
         builder.Services
             .AddControllers()
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
-            })
             .AddJsonOptions(opts =>
             {
                 opts.JsonSerializerOptions.Converters.Add(new DateTimeConverterHelper());
                 opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 opts.JsonSerializerOptions.WriteIndented = true;
             });
+
+        builder.Services.AddAutoMapper(typeof(MappingProfile));
 
         builder.Services
             .AddFluentValidationAutoValidation()
