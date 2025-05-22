@@ -33,14 +33,16 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
     public async Task<Speaker?> GetSpeakerByIdAsync(int id)
     {
         return await context.Speaker
-            .Include(s => s.Event)
-            .ThenInclude(e => e.Organizer)
+            .Include(s => s.SpeakerEvents)
+                .ThenInclude(se => se.Event)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task<List<Speaker>> GetAllSpeakersAsync()
     {
         return await context.Speaker
+            .Include(s => s.SpeakerEvents)
+                .ThenInclude(se => se.Event)
             .ToListAsync() ?? [];
     }
 }
