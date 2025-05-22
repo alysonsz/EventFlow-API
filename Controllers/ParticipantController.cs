@@ -1,5 +1,6 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Models;
+using EventFlow_API.Services;
 using EventFlow_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -21,6 +22,33 @@ public class ParticipantController(IParticipantService participantService) : Con
             return participant != null ? 
                 Ok(participant) : 
                 BadRequest();
+        }
+        catch (SqlException error)
+        {
+            return StatusCode(500,
+                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
+        }
+        catch (DbUpdateException error)
+        {
+            return StatusCode(500,
+                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
+        }
+        catch (Exception error)
+        {
+            return StatusCode(500,
+                new[] { error.Message });
+        }
+    }
+
+    [HttpPost("{eventId}/participant/{participantId}")]
+    public async Task<IActionResult> RegisterParticipantAsync(int eventId, int participantId)
+    {
+        try
+        {
+            var success = await participantService.RegisterToEventAsync(eventId, participantId);
+            return success
+                ? Ok(new { message = "Participante vinculado ao evento com sucesso." })
+                : NotFound(new { error = "Evento ou participante não encontrado." });
         }
         catch (SqlException error)
         {
