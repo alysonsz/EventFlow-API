@@ -38,6 +38,34 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
         }
     }
 
+    [HttpPost("{organizerId}/event/{eventId}")]
+    public async Task<IActionResult> RegisterParticipantAsync(int organizerId, int eventId)
+    {
+        try
+        {
+            var success = await organizerService.RegisterToEventAsync(organizerId, eventId);
+
+            return success ?
+                Ok(new { message = "Evento vinculado ao organizador com sucesso." }) :
+                NotFound(new { error = "Organizador ou evento não encontrado." });
+        }
+        catch (SqlException error)
+        {
+            return StatusCode(500,
+                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
+        }
+        catch (DbUpdateException error)
+        {
+            return StatusCode(500,
+                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
+        }
+        catch (Exception error)
+        {
+            return StatusCode(500,
+                new[] { error.Message });
+        }
+    }
+
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] OrganizerCommand organizerCommand)
     {
