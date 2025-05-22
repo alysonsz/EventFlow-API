@@ -41,7 +41,8 @@ public class EventRepository(EventFlowContext context) : IEventRepository
     {
         return await context.Event
             .Include(e => e.Organizer)
-            .Include(e => e.Speakers)
+            .Include(e => e.SpeakerEvents)
+                .ThenInclude(se => se.Speaker)
             .Include(e => e.Participants)
             .FirstOrDefaultAsync(e => e.Id == id);
     }
@@ -49,6 +50,10 @@ public class EventRepository(EventFlowContext context) : IEventRepository
     public async Task<List<Event>> GetAllEventsAsync()
     {
         return await context.Event
+            .Include(e => e.Organizer)
+            .Include(e => e.SpeakerEvents)
+                .ThenInclude(se => se.Speaker)
+            .Include(e => e.Participants)
             .ToListAsync() ?? [];
     }
 }
