@@ -41,14 +41,16 @@ public class EventMap : IEntityTypeConfiguration<Event>
             .HasColumnType("INT");
 
         builder
-            .HasMany(e => e.Speakers)
-            .WithOne(s => s.Event)
-            .HasForeignKey(s => s.EventId);
+            .HasMany(e => e.SpeakerEvents)
+            .WithOne(se => se.Event)
+            .HasForeignKey(se => se.EventId);
+
 
         builder
             .HasOne(e => e.Organizer)
             .WithMany(o => o.Events)
-            .HasForeignKey(e => e.OrganizerId);
+            .HasForeignKey(e => e.OrganizerId)
+            .HasConstraintName("FK_Event_Organizer");
 
         builder
             .HasMany(e => e.Participants)
