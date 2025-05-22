@@ -1,17 +1,27 @@
-﻿using EventFlow_API.Commands;
+﻿using AutoMapper;
+using EventFlow_API.Commands;
 using EventFlow_API.Models;
+using EventFlow_API.Models.DTOs;
 using EventFlow_API.Repository.Interfaces;
 using EventFlow_API.Services.Interfaces;
 
 namespace EventFlow_API.Services;
 
-public class OrganizerService(IOrganizerRepository repository) : IOrganizerService
+public class OrganizerService(IOrganizerRepository repository, IEventRepository eventRepository, IMapper mapper) : IOrganizerService
 {
-    public async Task<Organizer?> GetByIdAsync(int id)
-        => await repository.GetOrganizerByIdAsync(id);
+    public async Task<OrganizerDTO?> GetByIdAsync(int id)
+    {
+        var entity = await repository.GetOrganizerByIdAsync(id);
+        return entity is null ? 
+            null : 
+            mapper.Map<OrganizerDTO>(entity);
+    }
 
-    public async Task<List<Organizer>> GetAllAsync()
-        => await repository.GetAllOrganizersAsync();
+    public async Task<List<OrganizerDTO>> GetAllAsync()
+    {
+        var entities = await repository.GetAllOrganizersAsync();
+        return mapper.Map<List<OrganizerDTO>>(entities);
+    }
 
     public async Task<Organizer?> CreateAsync(OrganizerCommand command)
     {
@@ -24,15 +34,34 @@ public class OrganizerService(IOrganizerRepository repository) : IOrganizerServi
         return await repository.PostAsync(organizer);
     }
 
-    public async Task<Organizer?> UpdateAsync(int id, OrganizerCommand command)
+    public async Task<bool> RegisterToEventAsync(int eventId, int organizerId)
+    {
+        var organizer = await repository.GetOrganizerByIdAsync(organizerId);
+        var evento = await eventRepository.GetEventByIdAsync(eventId);
+
+        if (organizer == null || evento == null)
+            return false;
+
+        evento.OrganizerId = organizerId;
+        evento.Organizer = organizer;
+
+        await eventRepository.UpdateAsync(evento);
+        return true;
+    }
+
+    public async Task<OrganizerDTO?> UpdateAsync(int id, OrganizerCommand command)
     {
         var existing = await repository.GetOrganizerByIdAsync(id);
-        if (existing == null) return null;
+        if (existing == null) 
+            return null;
 
         existing.Name = command.Name;
         existing.Email = command.Email;
 
-        return await repository.UpdateAsync(existing);
+        var updated = await repository.UpdateAsync(existing);
+        return updated is null ?
+            null : 
+            mapper.Map<OrganizerDTO>(updated);
     }
 
     public async Task<bool> DeleteAsync(int id)
