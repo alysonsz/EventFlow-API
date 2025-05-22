@@ -32,14 +32,10 @@ public class SpeakerMap : IEntityTypeConfiguration<Speaker>
             .HasColumnType("VARCHAR")
             .HasMaxLength(150);
 
-        builder.Property(x => x.EventId)
-            .IsRequired()
-            .HasColumnName("EventId")
-            .HasColumnType("INT");
-
         builder
-            .HasOne(s => s.Event)
-            .WithMany(e => e.Speakers)
-            .HasForeignKey(s => s.EventId);
+            .HasMany(s => s.SpeakerEvents)
+            .WithOne(se => se.Speaker)
+            .HasForeignKey(se => se.SpeakerId);
+
     }
 }
