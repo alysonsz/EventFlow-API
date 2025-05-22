@@ -39,6 +39,28 @@ public class SpeakerController(ISpeakerService speakerService) : ControllerBase
         }
     }
 
+    [HttpPost("{speakerId:int}/event/{eventId:int}")]
+    public async Task<IActionResult> RegisterToEventAsync(int speakerId, int eventId)
+    {
+        try
+        {
+            var success = await speakerService.RegisterToEventAsync(eventId, speakerId);
+
+            if (!success)
+                return NotFound(new[] { "Evento ou Palestrante não encontrado." });
+
+            return Ok(new { message = "Palestrante vinculado com sucesso ao evento." });
+        }
+        catch (SqlException ex)
+        {
+            return StatusCode(500, new[] { "Erro ao acessar o banco de dados.", ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new[] { "Erro inesperado.", ex.Message });
+        }
+    }
+
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] SpeakerCommand speakerCommand)
     {
