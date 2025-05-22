@@ -1,7 +1,4 @@
 ﻿using EventFlow_API.Commands;
-using EventFlow_API.Models;
-using EventFlow_API.Repository.Interfaces;
-using EventFlow_API.Services;
 using EventFlow_API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -19,8 +16,8 @@ public class EventController(IEventService eventService) : ControllerBase
         {
             var newEvent = await eventService.CreateAsync(eventCommand);
 
-            return newEvent != null ? 
-                Ok(newEvent) : 
+            return newEvent != null ?
+                Ok(newEvent) :
                 BadRequest();
         }
         catch (SqlException error)
@@ -46,8 +43,8 @@ public class EventController(IEventService eventService) : ControllerBase
         try
         {
             var updated = await eventService.UpdateAsync(id, eventCommand);
-            return updated != null ? 
-                Ok(updated) : 
+            return updated != null ?
+                Ok(updated) :
                 NotFound();
         }
         catch (SqlException error)
@@ -73,8 +70,8 @@ public class EventController(IEventService eventService) : ControllerBase
         try
         {
             var deleted = await eventService.DeleteAsync(id);
-            return deleted ? 
-                Ok(id) : 
+            return deleted ?
+                Ok(id) :
                 NotFound();
         }
         catch (SqlException error)
@@ -100,8 +97,8 @@ public class EventController(IEventService eventService) : ControllerBase
         try
         {
             var result = await eventService.GetByIdAsync(id);
-            return result != null ? 
-                Ok(result) : 
+            return result != null ?
+                Ok(result) :
                 NotFound();
         }
         catch (SqlException error)
@@ -127,8 +124,8 @@ public class EventController(IEventService eventService) : ControllerBase
         try
         {
             var result = await eventService.GetAllAsync();
-            return result.Count != 0 ? 
-                Ok(result) : 
+            return result.Count != 0 ?
+                Ok(result) :
                 NotFound();
         }
         catch (SqlException error)
