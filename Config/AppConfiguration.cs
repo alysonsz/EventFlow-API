@@ -38,6 +38,7 @@ public static class AppConfiguration
         services.AddScoped<IOrganizerService, OrganizerService>();
         services.AddScoped<IParticipantService, ParticipantService>();
         services.AddScoped<ISpeakerService, SpeakerService>();
+        services.AddScoped<IAuthService, AuthService>();
 
 
         return services;
