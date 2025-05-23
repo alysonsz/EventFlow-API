@@ -34,15 +34,17 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
     {
         return await context.Organizer
             .Include(o => o.Events!)
-                .ThenInclude(e => e.Speakers!)
-            .Include(o => o.Events!)
-                .ThenInclude(e => e.Participants)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
     public async Task<List<Organizer>> GetAllOrganizersAsync()
     {
         return await context.Organizer
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.SpeakerEvents!)
+                    .ThenInclude(se => se.Speaker)
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.Participants)
             .ToListAsync() ?? [];
     }
 }
