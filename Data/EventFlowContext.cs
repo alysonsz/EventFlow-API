@@ -13,6 +13,7 @@ public class EventFlowContext : DbContext
     public DbSet<Participant> Participant { get; set; } = null!;
     public DbSet<Speaker> Speaker { get; set; } = null!;
     public DbSet<SpeakerEvent> SpeakerEvents { get; set; } = null!;
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
