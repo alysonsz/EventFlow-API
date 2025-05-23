@@ -16,5 +16,6 @@ public class MappingProfile : Profile
         CreateMap<Speaker, SpeakerDTO>()
             .ForMember(dest => dest.Events, opt => opt.MapFrom(src => src.SpeakerEvents.Select(se => se.Event)));
         CreateMap<Participant, ParticipantDTO>();
+        CreateMap<User, UserDTO>();
     }
 }
