@@ -6,6 +6,6 @@ public class Speaker
     public required string Name { get; set; }
     public string? Biography { get; set; }
     public required string Email { get; set; }
-    public int EventId { get; set; }
-    public Event? Event { get; set; }
+    public ICollection<SpeakerEvent> SpeakerEvents { get; set; } = [];
+
 }
