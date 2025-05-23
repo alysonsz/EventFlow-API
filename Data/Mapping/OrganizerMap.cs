@@ -29,7 +29,8 @@ public class OrganizerMap : IEntityTypeConfiguration<Organizer>
         builder
             .HasMany(o => o.Events)
             .WithOne(e => e.Organizer)
-            .HasForeignKey(e => e.OrganizerId);
+            .HasForeignKey(e => e.OrganizerId)
+            .HasConstraintName("FK_Event_Organizer");
     }
 }
 
