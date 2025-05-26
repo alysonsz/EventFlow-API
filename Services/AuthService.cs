@@ -1,4 +1,5 @@
 ﻿using EventFlow_API.Commands;
+using EventFlow_API.DTOs;
 using EventFlow_API.Models;
 using EventFlow_API.Models.DTOs;
 using EventFlow_API.Services.Interfaces;
@@ -64,4 +65,43 @@ public class AuthService(EventFlowContext context, IConfiguration configuration)
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+
+    public async Task<UserDTO?> GetAuthenticatedUserAsync(ClaimsPrincipal user)
+    {
+        var email = user.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrEmpty(email))
+            return null;
+
+        var entity = await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (entity == null)
+            return null;
+
+        return new UserDTO
+        {
+            Id = entity.Id,
+            Username = entity.Username,
+            Email = entity.Email
+        };
+    }
+
+    public async Task<bool> UpdatePasswordAsync(ClaimsPrincipal user, UserPasswordUpdateDTO dto)
+    {
+        var email = user.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email)) return false;
+
+        var entity = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (entity == null) return false;
+
+        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, entity.PasswordHash))
+            return false;
+
+        entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
 }
