@@ -1,5 +1,6 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -9,7 +10,7 @@ namespace EventFlow_API.Controllers;
 [ApiController]
 public class OrganizerController(IOrganizerService organizerService) : ControllerBase
 {
-
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] OrganizerCommand organizerCommand)
     {
@@ -38,6 +39,7 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
         }
     }
 
+    [Authorize]
     [HttpPost("{organizerId}/event/{eventId}")]
     public async Task<IActionResult> RegisterParticipantAsync(int organizerId, int eventId)
     {
@@ -66,6 +68,7 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
         }
     }
 
+    [Authorize]
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] OrganizerCommand organizerCommand)
     {
@@ -93,6 +96,7 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
         }
     }
 
+    [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {

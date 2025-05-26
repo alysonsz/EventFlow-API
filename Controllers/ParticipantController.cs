@@ -2,6 +2,7 @@
 using EventFlow_API.Models;
 using EventFlow_API.Services;
 using EventFlow_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -11,7 +12,7 @@ namespace EventFlow_API.Controllers;
 [ApiController]
 public class ParticipantController(IParticipantService participantService) : ControllerBase
 {
-
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] ParticipantCommand participantCommand)
     {
@@ -40,6 +41,7 @@ public class ParticipantController(IParticipantService participantService) : Con
         }
     }
 
+    [Authorize]
     [HttpPost("{eventId}/participant/{participantId}")]
     public async Task<IActionResult> RegisterParticipantAsync(int eventId, int participantId)
     {
@@ -67,6 +69,7 @@ public class ParticipantController(IParticipantService participantService) : Con
         }
     }
 
+    [Authorize]
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] ParticipantCommand participantCommand)
     {
@@ -94,6 +97,7 @@ public class ParticipantController(IParticipantService participantService) : Con
         }
     }
 
+    [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {

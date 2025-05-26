@@ -1,6 +1,6 @@
 ﻿using EventFlow_API.Commands;
-using EventFlow_API.Models;
 using EventFlow_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -10,7 +10,7 @@ namespace EventFlow_API.Controllers;
 [ApiController]
 public class SpeakerController(ISpeakerService speakerService) : ControllerBase
 {
-
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] SpeakerCommand speakerCommand)
     {
@@ -39,6 +39,7 @@ public class SpeakerController(ISpeakerService speakerService) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost("{speakerId:int}/event/{eventId:int}")]
     public async Task<IActionResult> RegisterToEventAsync(int speakerId, int eventId)
     {
@@ -61,6 +62,7 @@ public class SpeakerController(ISpeakerService speakerService) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] SpeakerCommand speakerCommand)
     {
@@ -88,6 +90,7 @@ public class SpeakerController(ISpeakerService speakerService) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {

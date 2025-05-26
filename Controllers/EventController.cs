@@ -1,5 +1,6 @@
 ﻿using EventFlow_API.Commands;
 using EventFlow_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -9,6 +10,7 @@ namespace EventFlow_API.Controllers;
 [ApiController]
 public class EventController(IEventService eventService) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] EventCommand eventCommand)
     {
@@ -37,6 +39,7 @@ public class EventController(IEventService eventService) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("update/{id:int}")]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] EventCommand eventCommand)
     {
@@ -64,6 +67,7 @@ public class EventController(IEventService eventService) : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
