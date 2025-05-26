@@ -9,6 +9,8 @@ using EventFlow_API.Validators;
 using FluentValidation.AspNetCore;
 using System.Text.Json.Serialization;
 using EventFlow_API.Profiles;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 
 namespace EventFlow_API.Config;
 
@@ -69,5 +71,36 @@ public static class AppConfiguration
             .AddValidatorsFromAssemblyContaining<SpeakerCommandValidator>()
             .AddValidatorsFromAssemblyContaining<OrganizerCommandValidator>()
             .AddValidatorsFromAssemblyContaining<ParticipantCommandValidator>();
+    }
+
+    public static IServiceCollection ConfigureSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "EventFlow API", Version = "v1" });
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Insira o token JWT: Bearer {seu_token}",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+
+            options.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            { securityScheme, Array.Empty<string>() }
+        });
+        });
+
+        return services;
     }
 }
