@@ -1,12 +1,9 @@
-﻿using System.Collections.ObjectModel;
-
-namespace EventFlow_API.Models;
+﻿namespace EventFlow_API.Models;
 
 public class Participant
 {
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public required string Email { get; set; }
-    public int EventId { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
     public ICollection<Event>? Events { get; set; } = [];
 }
