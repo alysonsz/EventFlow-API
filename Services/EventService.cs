@@ -35,7 +35,12 @@ public class EventService(IEventRepository repository, IMapper mapper) : IEventS
             OrganizerId = command.OrganizerId
         };
 
-        return await repository.PostAsync(newEvent);
+        var createdEvent = await repository.PostAsync(newEvent);
+        if (createdEvent == null)
+            return null;
+
+        var eventWithDetails = await repository.GetEventWithDetailsByIdAsync(createdEvent.Id);
+        return eventWithDetails;
     }
 
     public async Task<EventDTO?> UpdateAsync(int id, EventCommand command)
