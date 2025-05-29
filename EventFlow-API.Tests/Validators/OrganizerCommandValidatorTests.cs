@@ -1,0 +1,47 @@
+using EventFlow_API.Commands;
+using EventFlow_API.Validators;
+using FluentValidation.TestHelper;
+
+namespace EventFlow_API.Tests.Validators;
+
+public class OrganizerCommandValidatorTests
+{
+    private readonly OrganizerCommandValidator _validator;
+
+    public OrganizerCommandValidatorTests()
+    {
+        _validator = new OrganizerCommandValidator();
+    }
+
+    [Fact]
+    public void Should_HaveError_When_NameIsEmpty()
+    {
+        var model = new OrganizerCommand { Name = "", Email = "valid@example.com" };
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(o => o.Name);
+    }
+
+    [Fact]
+    public void Should_HaveError_When_EmailIsEmpty()
+    {
+        var model = new OrganizerCommand { Name = "Valid Name", Email = "" };
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(o => o.Email);
+    }
+
+    [Fact]
+    public void Should_HaveError_When_EmailInvalid()
+    {
+        var model = new OrganizerCommand { Name = "Valid Name", Email = "invalid-email" };
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(o => o.Email);
+    }
+
+    [Fact]
+    public void Should_PassValidation_When_ValidData()
+    {
+        var model = new OrganizerCommand { Name = "Valid Name", Email = "valid@example.com" };
+        var result = _validator.TestValidate(model);
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+}
