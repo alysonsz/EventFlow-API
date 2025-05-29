@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using EventFlow_API.Commands;
 using EventFlow_API.Models;
 using EventFlow_API.Models.DTOs;
@@ -145,10 +145,10 @@ public class EventServiceTests
     public async Task GetAllAsync_ShouldReturnMappedEvents()
     {
         var events = new List<Event> { new Event { Id = 1, Title = "Test" } };
-        var eventsDto = new List<Event> { new Event { Id = 1, Title = "Test" } };
+        var eventsDto = new List<EventDTO> { new EventDTO { Id = 1, Title = "Test" } };
 
         _eventRepoMock.Setup(r => r.GetAllEventsAsync()).ReturnsAsync(events);
-        _mapperMock.Setup(m => m.Map<IEnumerable<Event>>(events)).Returns(eventsDto);
+        _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventsDto);
 
         var result = await _eventService.GetAllAsync();
 
