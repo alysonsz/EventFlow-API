@@ -1,13 +1,4 @@
-using EventFlow_API.Commands;
-using EventFlow_API.Controllers;
-using EventFlow_API.Models;
-using EventFlow_API.Models.DTOs;
-using EventFlow_API.Services.Interfaces;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-
-namespace EventFlow_API.Tests.Controllers;
+﻿namespace EventFlow_API.Tests.Controllers;
 
 public class OrganizerControllerTests
 {

@@ -1,6 +1,4 @@
-using EventFlow_API.Commands;
-using EventFlow_API.Validators;
-using FluentValidation.TestHelper;
+﻿using FluentValidation.TestHelper;
 
 namespace EventFlow_API.Tests.Validators;
 
@@ -40,7 +38,7 @@ public class SpeakerCommandValidatorTests
     [Fact]
     public void Should_PassValidation_When_ValidData()
     {
-        var model = new SpeakerCommand { Name = "Valid Name", Email = "valid@example.com", Biography = "Valid Biography" };
+        var model = new SpeakerCommand { Name = "Valid Name", Email = "valid@example.com", Biography = "Valid Biography", EventId = 1 };
         var result = _validator.TestValidate(model);
         result.ShouldNotHaveAnyValidationErrors();
     }

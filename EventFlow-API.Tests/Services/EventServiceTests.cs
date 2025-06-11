@@ -1,11 +1,5 @@
 ﻿using AutoMapper;
-using EventFlow_API.Commands;
-using EventFlow_API.Models;
-using EventFlow_API.Models.DTOs;
-using EventFlow_API.Repository.Interfaces;
-using EventFlow_API.Services;
-using FluentAssertions;
-using Moq;
+using EventFlow.Core.Repository.Interfaces;
 
 namespace EventFlow_API.Tests.Services;
 
@@ -19,15 +13,25 @@ public class EventServiceTests
     {
         _eventRepoMock = new Mock<IEventRepository>();
         _mapperMock = new Mock<IMapper>();
-
         _eventService = new EventService(_eventRepoMock.Object, _mapperMock.Object);
     }
 
     [Fact]
     public async Task CreateAsync_ShouldReturnEvent_WhenCreated()
     {
-        var command = new EventCommand { Title = "Test", Date = DateTime.Now, Location = "Loc", OrganizerId = 1 };
-        var newEvent = new Event { Id = 1, Title = "Test" };
+        var command = new EventCommand
+        {
+            Title = "Test",
+            Date = DateTime.Now,
+            Location = "Loc",
+            OrganizerId = 1
+        };
+
+        var newEvent = new Event
+        {
+            Id = 1,
+            Title = "Test"
+        };
 
         _eventRepoMock.Setup(r => r.PostAsync(It.IsAny<Event>())).ReturnsAsync(newEvent);
         _eventRepoMock.Setup(r => r.GetEventWithDetailsByIdAsync(newEvent.Id)).ReturnsAsync(newEvent);
@@ -41,7 +45,10 @@ public class EventServiceTests
     [Fact]
     public async Task CreateAsync_ShouldReturnNull_WhenPostFails()
     {
-        var command = new EventCommand { Title = "Test" };
+        var command = new EventCommand
+        {
+            Title = "Test"
+        };
 
         _eventRepoMock.Setup(r => r.PostAsync(It.IsAny<Event>())).ReturnsAsync((Event)null!);
 
@@ -53,10 +60,29 @@ public class EventServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldReturnUpdatedEvent_WhenUpdateSuccessful()
     {
-        var command = new EventCommand { Title = "Updated", Date = DateTime.Now, Location = "Loc", OrganizerId = 1 };
-        var existing = new Event { Id = 1 };
-        var updated = new Event { Id = 1, Title = "Updated" };
-        var updatedDto = new EventDTO { Id = 1, Title = "Updated" };
+        var command = new EventCommand
+        {
+            Title = "Updated",
+            Date = DateTime.Now,
+            Location = "Loc",
+            OrganizerId = 1
+        };
+        var existing = new Event
+        {
+            Id = 1
+        };
+
+        var updated = new Event
+        {
+            Id = 1,
+            Title = "Updated"
+        };
+
+        var updatedDto = new EventDTO
+        {
+            Id = 1,
+            Title = "Updated"
+        };
 
         _eventRepoMock.Setup(r => r.GetEventByIdAsync(1)).ReturnsAsync(existing);
         _eventRepoMock.Setup(r => r.UpdateAsync(existing)).ReturnsAsync(updated);
@@ -81,8 +107,15 @@ public class EventServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldReturnNull_WhenUpdateFails()
     {
-        var command = new EventCommand { Title = "Updated" };
-        var existing = new Event { Id = 1 };
+        var command = new EventCommand
+        {
+            Title = "Updated"
+        };
+
+        var existing = new Event
+        {
+            Id = 1
+        };
 
         _eventRepoMock.Setup(r => r.GetEventByIdAsync(1)).ReturnsAsync(existing);
         _eventRepoMock.Setup(r => r.UpdateAsync(existing)).ReturnsAsync((Event)null!);
@@ -116,8 +149,17 @@ public class EventServiceTests
     public async Task GetByIdAsync_ShouldReturnEventDTO_WhenEventExists()
     {
         var eventId = 1;
-        var eventEntity = new Event { Id = eventId, Title = "Event Title" };
-        var eventDto = new EventDTO { Id = eventId, Title = "Event Title" };
+        var eventEntity = new Event
+        {
+            Id = eventId,
+            Title = "Event Title"
+        };
+
+        var eventDto = new EventDTO
+        {
+            Id = eventId,
+            Title = "Event Title"
+        };
 
         _eventRepoMock.Setup(r => r.GetEventWithDetailsByIdAsync(eventId)).ReturnsAsync(eventEntity);
         _mapperMock.Setup(m => m.Map<EventDTO>(eventEntity)).Returns(eventDto);
@@ -144,8 +186,17 @@ public class EventServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnMappedEvents()
     {
-        var events = new List<Event> { new Event { Id = 1, Title = "Test" } };
-        var eventsDto = new List<EventDTO> { new EventDTO { Id = 1, Title = "Test" } };
+        var events = new List<Event> { new Event
+        {
+            Id = 1,
+            Title = "Test"
+        }};
+
+        var eventsDto = new List<EventDTO> { new EventDTO
+        {
+            Id = 1,
+            Title = "Test"
+        }};
 
         _eventRepoMock.Setup(r => r.GetAllEventsAsync()).ReturnsAsync(events);
         _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventsDto);
@@ -160,8 +211,17 @@ public class EventServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnEvents()
     {
-        var events = new List<Event> { new Event { Id = 1, Title = "Test" } };
-        var eventDTOs = new List<EventDTO> { new EventDTO { Id = 1, Title = "Test" } };
+        var events = new List<Event> { new Event
+        {
+            Id = 1,
+            Title = "Test"
+        }};
+
+        var eventDTOs = new List<EventDTO> { new EventDTO
+        {
+            Id = 1,
+            Title = "Test"
+        }};
 
         _eventRepoMock.Setup(r => r.GetAllEventsAsync()).ReturnsAsync(events);
         _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventDTOs);

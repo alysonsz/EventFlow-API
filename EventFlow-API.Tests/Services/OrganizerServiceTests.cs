@@ -1,11 +1,5 @@
-using AutoMapper;
-using EventFlow_API.Commands;
-using EventFlow_API.Models;
-using EventFlow_API.Models.DTOs;
-using EventFlow_API.Repository.Interfaces;
-using EventFlow_API.Services;
-using FluentAssertions;
-using Moq;
+﻿using AutoMapper;
+using EventFlow.Core.Repository.Interfaces;
 
 namespace EventFlow_API.Tests.Services;
 

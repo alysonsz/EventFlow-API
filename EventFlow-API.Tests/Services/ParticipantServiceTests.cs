@@ -1,19 +1,11 @@
-using AutoMapper;
-using EventFlow_API.Commands;
-using EventFlow_API.Models;
-using EventFlow_API.Models.DTOs;
-using EventFlow_API.Repository.Interfaces;
-using EventFlow_API.Services;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Moq;
+﻿using AutoMapper;
+using EventFlow.Core.Repository.Interfaces;
 
 namespace EventFlow_API.Tests.Services;
 
 public class ParticipantServiceTests
 {
     private readonly ParticipantService _service;
-    private readonly EventFlowContext _context;
     private readonly Mock<IParticipantRepository> _mockParticipantRepository;
     private readonly Mock<IEventRepository> _mockEventRepository;
     private readonly Mock<IMapper> _mockMapper;
@@ -27,9 +19,8 @@ public class ParticipantServiceTests
         var options = new DbContextOptionsBuilder<EventFlowContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase")
             .Options;
-        _context = new EventFlowContext(options);
 
-        _service = new ParticipantService(_mockParticipantRepository.Object, _mockEventRepository.Object, _context, _mockMapper.Object);
+        _service = new ParticipantService(_mockParticipantRepository.Object, _mockEventRepository.Object, _mockMapper.Object);
     }
 
     [Fact]

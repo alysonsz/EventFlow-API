@@ -1,0 +1,47 @@
+﻿namespace EventFlow.Infrastructure.Repository;
+
+public class OrganizerRepository(EventFlowContext context) : IOrganizerRepository
+{
+    public async Task<Organizer> PostAsync(Organizer organizer)
+    {
+        await context.Organizer.AddAsync(organizer);
+        await context.SaveChangesAsync();
+        return organizer;
+    }
+
+    public async Task<Organizer> UpdateAsync(Organizer organizer)
+    {
+        context.Organizer.Update(organizer);
+        await context.SaveChangesAsync();
+        return organizer;
+    }
+
+    public async Task<int> DeleteAsync(int id)
+    {
+        var organizerToDelete = await context.Organizer.FindAsync(id);
+        if (organizerToDelete != null)
+        {
+            context.Organizer.Remove(organizerToDelete);
+            await context.SaveChangesAsync();
+        }
+        return id;
+    }
+
+    public async Task<Organizer?> GetOrganizerByIdAsync(int id)
+    {
+        return await context.Organizer
+            .Include(o => o.Events!)
+            .FirstOrDefaultAsync(o => o.Id == id);
+    }
+
+    public async Task<List<Organizer>> GetAllOrganizersAsync()
+    {
+        return await context.Organizer
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.SpeakerEvents!)
+                    .ThenInclude(se => se.Speaker)
+            .Include(o => o.Events!)
+                .ThenInclude(e => e.Participants)
+            .ToListAsync() ?? [];
+    }
+}
