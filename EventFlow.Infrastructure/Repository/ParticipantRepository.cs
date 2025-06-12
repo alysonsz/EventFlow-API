@@ -1,4 +1,6 @@
-﻿namespace EventFlow.Infrastructure.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EventFlow.Infrastructure.Repository;
 
 public class ParticipantRepository(EventFlowContext context) : IParticipantRepository
 {
@@ -36,10 +38,33 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<List<Participant>> GetAllParticipantsByEventIdAsync(int eventId)
+    public async Task<PagedResult<Participant>> GetAllParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
     {
-        return await context.Participant
-        .Where(p => p.Events!.Any(e => e.Id == eventId))
-        .ToListAsync() ?? [];
+        var query = context.Participant
+            .Where(p => p.Events!.Any(e => e.Id == eventId))
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(queryParameters.Filter))
+        {
+            var filter = queryParameters.Filter.ToLowerInvariant();
+            query = query.Where(p =>
+                p.Name.ToLowerInvariant().Contains(filter) ||
+                p.Email.ToLowerInvariant().Contains(filter)
+            );
+        }
+
+        query = queryParameters.SortBy?.ToLowerInvariant() switch
+        {
+            "name_desc" => query.OrderByDescending(p => p.Name),
+            _ => query.OrderBy(p => p.Name) 
+        };
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+            .Take(queryParameters.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Participant>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
     }
 }
