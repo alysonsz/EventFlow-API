@@ -31,9 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EventFlow-API\EventFlow.Presentation.csproj" />
     <ProjectReference Include="..\EventFlow.Application\EventFlow.Application.csproj" />
     <ProjectReference Include="..\EventFlow.Infrastructure\EventFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\EventFlow.Presentation\EventFlow.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

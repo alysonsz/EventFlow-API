@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EventFlow.Core.Models;
 using EventFlow.Core.Repository.Interfaces;
 
 namespace EventFlow_API.Tests.Services;
@@ -186,49 +187,46 @@ public class EventServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnMappedEvents()
     {
-        var events = new List<Event> { new Event
+        var queryParameters = new QueryParameters
         {
-            Id = 1,
-            Title = "Test"
-        }};
+            PageNumber = 1,
+            PageSize = 10,
+            Filter = null,
+            SortBy = null
+        };
 
-        var eventsDto = new List<EventDTO> { new EventDTO
-        {
-            Id = 1,
-            Title = "Test"
-        }};
+        var events = new List<Event> 
+        { 
+            new Event
+            {
+                Id = 1,
+                Title = "Test"
+            }
+        };
 
-        _eventRepoMock.Setup(r => r.GetAllEventsAsync()).ReturnsAsync(events);
+        var pagedResult = new PagedResult<Event>(events, queryParameters.PageNumber, queryParameters.PageSize, totalCount: 1);
+
+        var eventsDto = new List<EventDTO> 
+        { 
+            new EventDTO
+            {
+                Id = 1,
+                Title = "Test"
+            }
+        };
+
+        var pagedResultDto = new PagedResult<EventDTO>(eventsDto, queryParameters.PageNumber, queryParameters.PageSize, totalCount: 1);
+
+        _eventRepoMock.Setup(r => r.GetAllEventsAsync(queryParameters)).ReturnsAsync(pagedResult);
         _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventsDto);
 
-        var result = await _eventService.GetAllAsync();
+        var result = await _eventService.GetAllEventsAsync(queryParameters);
 
         result.Should().NotBeNull();
-        result.Should().HaveCount(1);
-        result.First().Title.Should().Be("Test");
-    }
-
-    [Fact]
-    public async Task GetAllAsync_ShouldReturnEvents()
-    {
-        var events = new List<Event> { new Event
-        {
-            Id = 1,
-            Title = "Test"
-        }};
-
-        var eventDTOs = new List<EventDTO> { new EventDTO
-        {
-            Id = 1,
-            Title = "Test"
-        }};
-
-        _eventRepoMock.Setup(r => r.GetAllEventsAsync()).ReturnsAsync(events);
-        _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventDTOs);
-
-        var result = await _eventService.GetAllAsync();
-
-        result.Should().NotBeNull().And.HaveCount(1);
-        result.First().Id.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+        result.Items.First().Title.Should().Be("Test");
+        result.TotalCount.Should().Be(1);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
     }
 }

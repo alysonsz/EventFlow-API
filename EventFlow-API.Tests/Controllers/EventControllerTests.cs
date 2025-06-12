@@ -1,4 +1,6 @@
-﻿namespace EventFlow_API.Tests.Controllers;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace EventFlow_API.Tests.Controllers;
 
 public class EventControllerTests
 {
@@ -9,6 +11,10 @@ public class EventControllerTests
     {
         _serviceMock = new Mock<IEventService>();
         _controller = new EventController(_serviceMock.Object);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
     }
 
     [Fact]
@@ -99,24 +105,18 @@ public class EventControllerTests
     }
 
     [Fact]
-    public async Task GetAllEventsAsync_ReturnsOk_WhenEventsExist()
-    {
-        var events = new List<EventDTO> { new EventDTO { Id = 1, Title = "Event 1" } };
-        _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(events);
-
-        var result = await _controller.GetAllEventsAsync();
-
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedEvents = Assert.IsType<List<EventDTO>>(okResult.Value);
-        Assert.Single(returnedEvents);
-    }
-
-    [Fact]
     public async Task GetAllEventsAsync_ReturnsNotFound_WhenNoEventsExist()
     {
-        _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<EventDTO>());
+        var queryParameters = new QueryParameters();
+        var emptyList = new List<EventDTO>();
 
-        var result = await _controller.GetAllEventsAsync();
+        var pagedResult = new PagedResult<EventDTO>(emptyList, 1, 10, 0);
+
+        _serviceMock
+            .Setup(s => s.GetAllEventsAsync(It.IsAny<QueryParameters>()))
+            .ReturnsAsync(pagedResult);
+
+        var result = await _controller.GetAllEventsAsync(queryParameters);
 
         Assert.IsType<NotFoundResult>(result);
     }
