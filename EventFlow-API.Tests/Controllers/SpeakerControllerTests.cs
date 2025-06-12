@@ -1,4 +1,6 @@
-﻿namespace EventFlow_API.Tests.Controllers;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace EventFlow_API.Tests.Controllers;
 
 public class SpeakerControllerTests
 {
@@ -9,6 +11,10 @@ public class SpeakerControllerTests
     {
         _mockService = new Mock<ISpeakerService>();
         _controller = new SpeakerController(_mockService.Object);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
     }
 
     [Fact]
@@ -122,10 +128,15 @@ public class SpeakerControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WithList()
     {
-        var speakers = new List<SpeakerDTO> { new SpeakerDTO { Id = 1, Name = "Speaker 1" } };
-        _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(speakers);
+        var queryParameters = new QueryParameters();
+        var speakers = new List<SpeakerDTO> { new() { Id = 1, Name = "Speaker 1" } };
+        var pagedResult = new PagedResult<SpeakerDTO>(speakers, 1, 10, 1);
 
-        var result = await _controller.GetAllSpeakersAsync();
+        _mockService
+            .Setup(s => s.GetAllSpeakersAsync(It.IsAny<QueryParameters>()))
+            .ReturnsAsync(pagedResult);
+
+        var result = await _controller.GetAllSpeakersAsync(queryParameters);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnValue = Assert.IsType<List<SpeakerDTO>>(okResult.Value);

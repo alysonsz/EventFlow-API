@@ -159,17 +159,48 @@ public class SpeakerServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnSpeakers()
+    public async Task GetAllAsync_ShouldReturnPagedResultSpeakers()
     {
-        var speakers = new List<Speaker> { new Speaker { Id = 1, Name = "Speaker 1" } };
-        var speakerDTOs = new List<SpeakerDTO> { new SpeakerDTO { Id = 1, Name = "Speaker 1" } };
+        var queryParameters = new QueryParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Filter = null,
+            SortBy = null
+        };
 
-        _mockRepository.Setup(r => r.GetAllSpeakersAsync()).ReturnsAsync(speakers);
-        _mockMapper.Setup(m => m.Map<List<SpeakerDTO>>(speakers)).Returns(speakerDTOs);
+        var speakers = new List<Speaker>
+    {
+        new Speaker { Id = 1, Name = "Speaker 1" }
+    };
 
-        var result = await _service.GetAllAsync();
+        var pagedResult = new PagedResult<Speaker>(
+            speakers,
+            queryParameters.PageNumber,
+            queryParameters.PageSize,
+            totalCount: 1
+        );
 
-        result.Should().NotBeNull().And.HaveCount(1);
-        result.First().Id.Should().Be(1);
+        var speakerDTOs = new List<SpeakerDTO>
+    {
+        new SpeakerDTO { Id = 1, Name = "Speaker 1" }
+    };
+
+        _mockRepository
+            .Setup(r => r.GetAllSpeakersAsync(queryParameters))
+            .ReturnsAsync(pagedResult);
+
+        _mockMapper
+            .Setup(m => m.Map<List<SpeakerDTO>>(speakers))
+            .Returns(speakerDTOs);
+
+        var result = await _service.GetAllSpeakersAsync(queryParameters);
+
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(1);
+        result.Items.First().Id.Should().Be(1);
+        result.TotalCount.Should().Be(1);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
     }
 }
