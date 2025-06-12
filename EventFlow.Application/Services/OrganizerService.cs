@@ -12,10 +12,18 @@ public class OrganizerService(IOrganizerRepository repository, IEventRepository 
             mapper.Map<OrganizerDTO>(entity);
     }
 
-    public async Task<List<OrganizerDTO>> GetAllAsync()
+    public async Task<PagedResult<OrganizerDTO>> GetAllOrganizersAsync(QueryParameters queryParameters)
     {
-        var entities = await repository.GetAllOrganizersAsync();
-        return mapper.Map<List<OrganizerDTO>>(entities);
+        var pagedOrganizers = await repository.GetAllOrganizersAsync(queryParameters);
+
+        var organizerDtos = mapper.Map<List<OrganizerDTO>>(pagedOrganizers.Items);
+
+        return new PagedResult<OrganizerDTO>(
+            organizerDtos,
+            pagedOrganizers.PageNumber,
+            pagedOrganizers.PageSize,
+            pagedOrganizers.TotalCount
+        );
     }
 
     public async Task<Organizer?> CreateAsync(OrganizerCommand command)
