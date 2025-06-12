@@ -141,17 +141,48 @@ public class OrganizerServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnOrganizers()
+    public async Task GetAllAsync_ShouldReturnPagedResultOrganizers()
     {
-        var organizers = new List<Organizer> { new Organizer { Id = 1, Name = "Organizer 1" } };
-        var organizerDTOs = new List<OrganizerDTO> { new OrganizerDTO { Id = 1, Name = "Organizer 1" } };
+        var queryParameters = new QueryParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Filter = null,
+            SortBy = null
+        };
 
-        _mockOrganizerRepository.Setup(r => r.GetAllOrganizersAsync()).ReturnsAsync(organizers);
-        _mockMapper.Setup(m => m.Map<List<OrganizerDTO>>(organizers)).Returns(organizerDTOs);
+        var organizers = new List<Organizer>
+    {
+        new Organizer { Id = 1, Name = "Organizer 1" }
+    };
 
-        var result = await _service.GetAllAsync();
+        var pagedResult = new PagedResult<Organizer>(
+            organizers,
+            queryParameters.PageNumber,
+            queryParameters.PageSize,
+            totalCount: 1
+        );
 
-        result.Should().NotBeNull().And.HaveCount(1);
-        result.First().Id.Should().Be(1);
+        var organizerDTOs = new List<OrganizerDTO>
+    {
+        new OrganizerDTO { Id = 1, Name = "Organizer 1" }
+    };
+
+        _mockOrganizerRepository
+            .Setup(r => r.GetAllOrganizersAsync(queryParameters))
+            .ReturnsAsync(pagedResult);
+
+        _mockMapper
+            .Setup(m => m.Map<List<OrganizerDTO>>(organizers))
+            .Returns(organizerDTOs);
+
+        var result = await _service.GetAllOrganizersAsync(queryParameters);
+
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(1);
+        result.Items.First().Id.Should().Be(1);
+        result.TotalCount.Should().Be(1);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
     }
 }

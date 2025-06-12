@@ -1,4 +1,6 @@
-﻿namespace EventFlow_API.Tests.Controllers;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace EventFlow_API.Tests.Controllers;
 
 public class OrganizerControllerTests
 {
@@ -9,6 +11,10 @@ public class OrganizerControllerTests
     {
         _mockService = new Mock<IOrganizerService>();
         _controller = new OrganizerController(_mockService.Object);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
     }
 
     [Fact]
@@ -122,13 +128,19 @@ public class OrganizerControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WithList()
     {
-        var organizers = new List<OrganizerDTO> { new OrganizerDTO { Id = 1, Name = "Organizer 1" } };
-        _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(organizers);
+        var queryParameters = new QueryParameters();
+        var organizers = new List<OrganizerDTO> { new() { Id = 1, Name = "Organizer 1" } };
+        var pagedResult = new PagedResult<OrganizerDTO>(organizers, 1, 10, 1);
 
-        var result = await _controller.GetAllOrganizersAsync();
+        _mockService
+            .Setup(s => s.GetAllOrganizersAsync(It.IsAny<QueryParameters>()))
+            .ReturnsAsync(pagedResult);
+
+        var result = await _controller.GetAllOrganizersAsync(queryParameters);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnValue = Assert.IsType<List<OrganizerDTO>>(okResult.Value);
         returnValue.Should().HaveCount(1);
     }
+
 }
