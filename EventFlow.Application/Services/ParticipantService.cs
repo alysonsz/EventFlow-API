@@ -11,10 +11,18 @@ public class ParticipantService(IParticipantRepository repository, IEventReposit
             null : mapper.Map<ParticipantDTO>(entity);
     }
 
-    public async Task<List<ParticipantDTO>> GetAllAsync(int eventId)
+    public async Task<PagedResult<ParticipantDTO>> GetAllParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
     {
-        var entities = await repository.GetAllParticipantsByEventIdAsync(eventId);
-        return mapper.Map<List<ParticipantDTO>>(entities);
+        var pagedParticipants = await repository.GetAllParticipantsByEventIdAsync(eventId, queryParameters);
+
+        var participantDtos = mapper.Map<List<ParticipantDTO>>(pagedParticipants.Items);
+
+        return new PagedResult<ParticipantDTO>(
+            participantDtos,
+            pagedParticipants.PageNumber,
+            pagedParticipants.PageSize,
+            pagedParticipants.TotalCount
+        );
     }
 
     public async Task<Participant?> CreateAsync(ParticipantCommand command)
