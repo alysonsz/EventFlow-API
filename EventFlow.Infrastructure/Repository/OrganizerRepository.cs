@@ -1,4 +1,6 @@
-﻿namespace EventFlow.Infrastructure.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EventFlow.Infrastructure.Repository;
 
 public class OrganizerRepository(EventFlowContext context) : IOrganizerRepository
 {
@@ -34,14 +36,33 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
-    public async Task<List<Organizer>> GetAllOrganizersAsync()
+    public async Task<PagedResult<Organizer>> GetAllOrganizersAsync(QueryParameters queryParameters)
     {
-        return await context.Organizer
-            .Include(o => o.Events!)
-                .ThenInclude(e => e.SpeakerEvents!)
-                    .ThenInclude(se => se.Speaker)
-            .Include(o => o.Events!)
-                .ThenInclude(e => e.Participants)
-            .ToListAsync() ?? [];
+        var query = context.Organizer
+            .Include(o => o.Events)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(queryParameters.Filter))
+        {
+            var filter = queryParameters.Filter.ToLowerInvariant();
+            query = query.Where(o =>
+                o.Name.ToLowerInvariant().Contains(filter) ||
+                o.Email.ToLowerInvariant().Contains(filter)
+            );
+        }
+
+        query = queryParameters.SortBy?.ToLowerInvariant() switch
+        {
+            "name_desc" => query.OrderByDescending(o => o.Name),
+            _ => query.OrderBy(o => o.Name) 
+        };
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+            .Take(queryParameters.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Organizer>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
     }
 }
