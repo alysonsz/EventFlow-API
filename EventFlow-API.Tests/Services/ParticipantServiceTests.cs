@@ -146,17 +146,48 @@ public class ParticipantServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnParticipants()
+    public async Task GetAllAsync_ShouldReturnPagedResultParticipants()
     {
-        var participants = new List<Participant> { new Participant { Id = 1, Name = "Participant 1" } };
-        var participantDTOs = new List<ParticipantDTO> { new ParticipantDTO { Id = 1, Name = "Participant 1" } };
+        var queryParameters = new QueryParameters
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Filter = null,
+            SortBy = null
+        };
 
-        _mockParticipantRepository.Setup(r => r.GetAllParticipantsByEventIdAsync(1)).ReturnsAsync(participants);
-        _mockMapper.Setup(m => m.Map<List<ParticipantDTO>>(participants)).Returns(participantDTOs);
+        var participants = new List<Participant>
+    {
+        new Participant { Id = 1, Name = "Participant 1" }
+    };
 
-        var result = await _service.GetAllAsync(1);
+        var pagedResult = new PagedResult<Participant>(
+            participants,
+            queryParameters.PageNumber,
+            queryParameters.PageSize,
+            totalCount: 1
+        );
 
-        result.Should().NotBeNull().And.HaveCount(1);
-        result.First().Id.Should().Be(1);
+        var participantDTOs = new List<ParticipantDTO>
+    {
+        new ParticipantDTO { Id = 1, Name = "Participant 1" }
+    };
+
+        _mockParticipantRepository
+            .Setup(r => r.GetAllParticipantsByEventIdAsync(1, queryParameters))
+            .ReturnsAsync(pagedResult);
+
+        _mockMapper
+            .Setup(m => m.Map<List<ParticipantDTO>>(participants))
+            .Returns(participantDTOs);
+
+        var result = await _service.GetAllParticipantsByEventIdAsync(1, queryParameters);
+
+        result.Should().NotBeNull();
+        result.Items.Should().HaveCount(1);
+        result.Items.First().Id.Should().Be(1);
+        result.TotalCount.Should().Be(1);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(10);
     }
 }

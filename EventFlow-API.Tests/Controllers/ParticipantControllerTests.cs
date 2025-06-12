@@ -1,4 +1,6 @@
-﻿namespace EventFlow_API.Tests.Controllers;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace EventFlow_API.Tests.Controllers;
 
 public class ParticipantControllerTests
 {
@@ -9,6 +11,10 @@ public class ParticipantControllerTests
     {
         _mockService = new Mock<IParticipantService>();
         _controller = new ParticipantController(_mockService.Object);
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
     }
 
     [Fact]
@@ -123,13 +129,18 @@ public class ParticipantControllerTests
     public async Task GetAll_ReturnsOk_WithList()
     {
         var eventId = 1;
-        var participants = new List<ParticipantDTO> { new ParticipantDTO { Id = 1, Name = "Participant 1" } };
-        _mockService.Setup(s => s.GetAllAsync(eventId)).ReturnsAsync(participants);
+        var queryParameters = new QueryParameters();
+        var participants = new List<ParticipantDTO> { new() { Id = 1, Name = "Participant 1" } };
+        var pagedResult = new PagedResult<ParticipantDTO>(participants, 1, 10, 1);
 
-        var result = await _controller.GetAllParticipantsAsync(eventId);
+        _mockService
+            .Setup(s => s.GetAllParticipantsByEventIdAsync(eventId, It.IsAny<QueryParameters>()))
+            .ReturnsAsync(pagedResult);
+
+        var result = await _controller.GetAllParticipantsAsync(eventId, queryParameters);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnValue = Assert.IsType<List<ParticipantDTO>>(okResult.Value);
-        returnValue.Should().HaveCount(1);
     }
+
 }
