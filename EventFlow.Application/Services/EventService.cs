@@ -13,10 +13,18 @@ public class EventService(IEventRepository repository, IMapper mapper) : IEventS
             mapper.Map<EventDTO>(entity);
     }
 
-    public async Task<List<EventDTO>> GetAllAsync()
+    public async Task<PagedResult<EventDTO>> GetAllEventsAsync(QueryParameters queryParameters)
     {
-        var events = await repository.GetAllEventsAsync();
-        return mapper.Map<List<EventDTO>>(events);
+        var pagedEvents = await repository.GetAllEventsAsync(queryParameters);
+
+        var eventDtos = mapper.Map<List<EventDTO>>(pagedEvents.Items);
+
+        return new PagedResult<EventDTO>(
+            eventDtos,
+            pagedEvents.PageNumber,
+            pagedEvents.PageSize,
+            pagedEvents.TotalCount
+        );
     }
 
     public async Task<Event?> CreateAsync(EventCommand command)
