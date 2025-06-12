@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using EventFlow.Core.Models;
+using Microsoft.Data.SqlClient;
+using System.Text.Json;
 
 namespace EventFlow.Presentation.Controllers;
 
@@ -119,14 +121,27 @@ public class EventController(IEventService eventService) : ControllerBase
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllEventsAsync()
+    public async Task<IActionResult> GetAllEventsAsync([FromQuery] QueryParameters queryParameters)
     {
         try
         {
-            var result = await eventService.GetAllAsync();
-            return result.Count != 0 ?
-                Ok(result) :
-                NotFound();
+            var result = await eventService.GetAllEventsAsync(queryParameters);
+
+            if (result.Items.Count == 0)
+                return NotFound();
+
+            var metadata = new
+            {
+                result.TotalCount,
+                result.PageSize,
+                result.PageNumber,
+                result.TotalPages,
+                result.HasNextPage,
+                result.HasPreviousPage
+            };
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+
+            return Ok(result.Items);
         }
         catch (SqlException error)
         {
