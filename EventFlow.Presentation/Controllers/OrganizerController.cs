@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using EventFlow.Core.Models;
+using Microsoft.Data.SqlClient;
+using System.Text.Json;
 
 namespace EventFlow.Presentation.Controllers;
 
@@ -148,14 +150,27 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllOrganizersAsync()
+    public async Task<IActionResult> GetAllOrganizersAsync([FromQuery] QueryParameters queryParameters)
     {
         try
         {
-            var result = await organizerService.GetAllAsync();
-            return result.Count != 0 ?
-                Ok(result) :
-                NotFound();
+            var result = await organizerService.GetAllOrganizersAsync(queryParameters);
+
+            if (result.Items.Count == 0)
+                return NotFound("Nenhum organizador encontrado com os critérios fornecidos.");
+
+            var metadata = new
+            {
+                result.TotalCount,
+                result.PageSize,
+                result.PageNumber,
+                result.TotalPages,
+                result.HasNextPage,
+                result.HasPreviousPage
+            };
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+
+            return Ok(result.Items);
         }
         catch (SqlException error)
         {
