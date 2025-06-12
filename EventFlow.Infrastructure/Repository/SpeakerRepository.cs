@@ -1,4 +1,6 @@
-﻿namespace EventFlow.Infrastructure.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EventFlow.Infrastructure.Repository;
 
 public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
 {
@@ -35,12 +37,35 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<List<Speaker>> GetAllSpeakersAsync()
+    public async Task<PagedResult<Speaker>> GetAllSpeakersAsync(QueryParameters queryParameters)
     {
-        return await context.Speaker
+        var query = context.Speaker
             .Include(s => s.SpeakerEvents)
                 .ThenInclude(se => se.Event)
-            .ToListAsync() ?? [];
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(queryParameters.Filter))
+        {
+            var filter = queryParameters.Filter.ToLowerInvariant();
+            query = query.Where(s =>
+                s.Name.ToLowerInvariant().Contains(filter) ||
+                s.Email.ToLowerInvariant().Contains(filter)
+            );
+        }
+
+        query = queryParameters.SortBy?.ToLowerInvariant() switch
+        {
+            "name_desc" => query.OrderByDescending(s => s.Name),
+            _ => query.OrderBy(s => s.Name)
+        };
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+            .Take(queryParameters.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Speaker>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
     }
 
     public async Task AddSpeakerEventAsync(SpeakerEvent speakerEvent)
