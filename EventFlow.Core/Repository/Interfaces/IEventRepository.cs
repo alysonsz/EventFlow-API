@@ -7,5 +7,5 @@ public interface IEventRepository
     Task<int> DeleteAsync(int id);
     Task<Event?> GetEventByIdAsync(int id);
     Task<Event?> GetEventWithDetailsByIdAsync(int id);
-    Task<List<Event>> GetAllEventsAsync();
+    Task<PagedResult<Event>> GetAllEventsAsync(QueryParameters queryParameters);
 }
