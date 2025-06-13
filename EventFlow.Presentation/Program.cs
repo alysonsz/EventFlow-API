@@ -3,8 +3,20 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorApp",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7091", "http://localhost:5082")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 AppConfiguration.ConfigureMvc(builder);
 
+builder.Services.ConfigureSwagger();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextConfig(builder.Configuration);
@@ -29,10 +41,14 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
+app.UseCors("AllowBlazorApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
