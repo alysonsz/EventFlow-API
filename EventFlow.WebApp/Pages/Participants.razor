@@ -1,0 +1,88 @@
+﻿@page "/participants"
+@using EventFlow.Core.Models.DTOs
+@using EventFlow.WebApp.Helpers
+@inject HttpClient Http
+
+<PageTitle>Participantes por Evento</PageTitle>
+
+<h1>Buscar Participantes por Evento</h1>
+
+<div class="input-group mb-3" style="max-width: 500px;">
+    <input @bind="eventId" type="text" class="form-control" placeholder="Digite o ID do Evento (GUID)" />
+    <button @onclick="SearchParticipants" class="btn btn-primary" type="button">Buscar</button>
+</div>
+
+<hr />
+
+@if (isLoading)
+{
+    <p><em>Buscando...</em></p>
+}
+else if (searchPerformed && (participants == null || participants.Count == 0))
+{
+    <p>Nenhum participante encontrado para o evento com o ID fornecido.</p>
+}
+else if (participants != null && participants.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var participant in participants)
+            {
+                <tr>
+                    <td>@participant.Name</td>
+                    <td>@participant.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>Por favor, insira um ID de evento e clique em buscar.</em></p>
+}
+
+
+@code {
+    private List<ParticipantDTO>? participants;
+    private bool isLoading = false;
+    private bool searchPerformed = false;
+    private string eventId = string.Empty;
+
+    private System.Text.Json.JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new DateTimeConverterHelper() }
+        };
+
+    private async Task SearchParticipants()
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+        {
+            return;
+        }
+
+        isLoading = true;
+        searchPerformed = true;
+        participants = null; 
+
+        try
+        {
+            var url = $"participant/{eventId}/all";
+            participants = await Http.GetFromJsonAsync<List<ParticipantDTO>>(url, jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao buscar participantes: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
