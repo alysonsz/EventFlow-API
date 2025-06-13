@@ -148,7 +148,7 @@ public class ParticipantController(IParticipantService participantService) : Con
         }
     }
 
-    [HttpGet("all")]
+    [HttpGet("{eventId}/all")]
     public async Task<IActionResult> GetAllParticipantsAsync(int eventId, [FromQuery] QueryParameters queryParameters)
     {
         try
