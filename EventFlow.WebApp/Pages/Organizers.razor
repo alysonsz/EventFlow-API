@@ -1,0 +1,68 @@
+﻿@page "/organizers"
+@using EventFlow.Core.Models.DTOs
+@inject HttpClient Http
+
+<PageTitle>Organizadores</PageTitle>
+
+<h1>Organizadores</h1>
+
+@if (isLoading)
+{
+    <p><em>@loadingStatus</em></p>
+}
+else if (organizers == null || organizers.Count == 0)
+{
+    <p>Nenhum organizador encontrado ou falha ao carregar.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var organizer in organizers)
+            {
+                <tr>
+                    <td>@organizer.Name</td>
+                    <td>@organizer.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrganizerDTO>? organizers;
+    private bool isLoading = true;
+    private string loadingStatus = "Iniciando...";
+
+    private System.Text.Json.JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new EventFlow.WebApp.Helpers.DateTimeConverterHelper() }
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            loadingStatus = "Buscando dados da API...";
+            await InvokeAsync(StateHasChanged);
+
+            organizers = await Http.GetFromJsonAsync<List<OrganizerDTO>>("organizer/all", jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"EXCEÇÃO CAPTURADA: {ex.ToString()}");
+            loadingStatus = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
