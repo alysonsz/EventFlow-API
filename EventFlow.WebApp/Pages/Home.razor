@@ -1,0 +1,109 @@
+﻿@page "/"
+@using EventFlow.Core.Models.DTOs
+@inject HttpClient Http
+
+<PageTitle>Dashboard - EventFlow</PageTitle>
+
+<div class="container py-4">
+    <h1 class="mb-2">Bem-vindo ao EventFlow!</h1>
+    <p class="text-muted mb-4">Gerencie seus eventos, participantes e muito mais.</p>
+
+    @if (stats == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando estatísticas...</span>
+            </div>
+            <p class="mt-2">Carregando estatísticas...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card card-events">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="stat-card-title">EVENTOS</div>
+                                <div class="stat-card-value">@stats.EventCount</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-calendar2-event-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card card-organizers">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="stat-card-title">ORGANIZADORES</div>
+                                <div class="stat-card-value">@stats.OrganizerCount</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card card-speakers">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="stat-card-title">PALESTRANTES</div>
+                                <div class="stat-card-value">@stats.SpeakerCount</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-mic-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card card-participants">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="stat-card-title">PARTICIPANTES</div>
+                                <div class="stat-card-value">@stats.ParticipantCount</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private DashboardStatsDTO? stats;
+
+    private System.Text.Json.JsonSerializerOptions jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            stats = await Http.GetFromJsonAsync<DashboardStatsDTO>("dashboard/statistics/all", jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao buscar estatísticas: {ex.Message}");
+        }
+    }
+}
