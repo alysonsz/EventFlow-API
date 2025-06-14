@@ -5,47 +5,52 @@
 
 <PageTitle>Participantes por Evento</PageTitle>
 
-<h1>Buscar Participantes por Evento</h1>
+<div class="container py-4">
+    <h1 class="mb-3">Buscar Participantes por Evento</h1>
+    <p class="text-muted mb-4">Insira o ID de um evento para ver a lista de participantes inscritos.</p>
 
-<div class="input-group mb-3" style="max-width: 500px;">
-    <input @bind="eventId" type="text" class="form-control" placeholder="Digite o ID do Evento (GUID)" />
-    <button @onclick="SearchParticipants" class="btn btn-primary" type="button">Buscar</button>
-</div>
+    <div class="input-group mb-4" style="max-width: 500px;">
+        <input @bind="eventId" @onkeyup="HandleInput" type="text" class="form-control" placeholder="Digite o ID do Evento (GUID)" />
+        <button @onclick="SearchParticipants" class="btn btn-primary" type="button" disabled="@isLoading">
+            @if (isLoading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Buscando...</span>
+            }
+            else
+            {
+                <i class="bi bi-search"></i> <span>Buscar</span>
+            }
+        </button>
+    </div>
 
-<hr />
+    <hr />
 
-@if (isLoading)
-{
-    <p><em>Buscando...</em></p>
-}
-else if (searchPerformed && (participants == null || participants.Count == 0))
-{
-    <p>Nenhum participante encontrado para o evento com o ID fornecido.</p>
-}
-else if (participants != null && participants.Count > 0)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (searchPerformed && !isLoading && (participants == null || participants.Count == 0))
+    {
+        <div class="alert alert-warning" role="alert">
+            Nenhum participante encontrado para o evento com o ID fornecido.
+        </div>
+    }
+    else if (participants != null && participants.Count > 0)
+    {
+        <div class="organizer-grid">
             @foreach (var participant in participants)
             {
-                <tr>
-                    <td>@participant.Name</td>
-                    <td>@participant.Email</td>
-                </tr>
+                <div class="organizer-card">
+                    <img src="https://i.pravatar.cc/150?u=@participant.Id" class="card-avatar" alt="Avatar do Participante">
+                    <div class="card-body">
+                        <h4 class="card-title">@participant.Name</h4>
+                        <p class="card-info">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>@participant.Email</span>
+                        </p>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
-else
-{
-    <p><em>Por favor, insira um ID de evento e clique em buscar.</em></p>
-}
+        </div>
+    }
+</div>
 
 
 @code {
@@ -60,16 +65,21 @@ else
             Converters = { new DateTimeConverterHelper() }
         };
 
+    private async Task HandleInput(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchParticipants();
+        }
+    }
+
     private async Task SearchParticipants()
     {
-        if (string.IsNullOrWhiteSpace(eventId))
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(eventId)) return;
 
         isLoading = true;
         searchPerformed = true;
-        participants = null; 
+        participants = null;
 
         try
         {
@@ -78,7 +88,8 @@ else
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erro ao buscar participantes: {ex}");
+            Console.WriteLine($"Erro ao buscar participantes: {ex.Message}");
+            participants = new List<ParticipantDTO>();
         }
         finally
         {

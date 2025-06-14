@@ -4,42 +4,116 @@
 @using EventFlow.WebApp.Helpers
 @inject HttpClient Http
 
-<PageTitle>Eventos</PageTitle>
+<PageTitle>Eventos - EventFlow</PageTitle>
 
-<h1>Lista de Eventos</h1>
+<div class="fade-in">
+    <div class="card-header">
+        <h1 class="card-title">🎉 Eventos</h1>
+        <p class="mb-0">Gerencie e visualize todos os eventos da plataforma</p>
+    </div>
 
-@if (isLoading)
-{
-    <p><em>@loadingStatus</em></p>
-}
-else if (events == null || events.Count == 0)
-{
-    <p>Nenhum evento encontrado ou falha ao carregar.</p>
-}
-else
-{
-    <table class = "table">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Data</th>
-                <th>Local</th>
-                <th>Organizador</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var ev in events)
-            {
-                <tr>
-                    <td>@ev.Title</td>
-                    <td>@ev.Date.ToString("dd/MM/yyyy")</td>
-                    <td>@ev.Location</td>
-                    <td>@(ev.Organizer?.Name ?? "N/A")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">@loadingStatus</p>
+        </div>
+    }
+    else if (events == null || events.Count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <h3>Nenhum evento encontrado</h3>
+            <p>Não há eventos cadastrados no momento ou ocorreu uma falha ao carregar os dados.</p>
+            <button class="btn btn-primary" @onclick="ReloadEvents">
+                🔄 Tentar Novamente
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Lista de Eventos</h2>
+                <div class="badge badge-primary">@events.Count evento(s)</div>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>📋 Título</th>
+                            <th>📅 Data</th>
+                            <th>📍 Local</th>
+                            <th>👤 Organizador</th>
+                            <th>🏷️ Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in events)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@ev.Title</strong>
+                                </td>
+                                <td>
+                                    @ev.Date.ToString("dd/MM/yyyy")
+                                    <br>
+                                    <small class="text-muted">@ev.Date.ToString("HH:mm")</small>
+                                </td>
+                                <td>@ev.Location</td>
+                                <td>
+                                    @if (ev.Organizer != null)
+                                    {
+                                        <span class="badge badge-success">@ev.Organizer.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (ev.Date > DateTime.Now)
+                                    {
+                                        <span class="badge badge-primary">Futuro</span>
+                                    }
+                                    else if (ev.Date.Date == DateTime.Now.Date)
+                                    {
+                                        <span class="badge badge-warning">Hoje</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">Concluído</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">📊 Estatísticas</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <h4 class="text-primary">@events.Count</h4>
+                    <p>Total de Eventos</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h4 class="text-success">@events.Count(e => e.Date > DateTime.Now)</h4>
+                    <p>Eventos Futuros</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h4 class="text-warning">@events.Count(e => e.Date < DateTime.Now)</h4>
+                    <p>Eventos Passados</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private List<EventDTO>? events;
@@ -47,27 +121,48 @@ else
     private string loadingStatus = "Iniciando...";
 
     private System.Text.Json.JsonSerializerOptions jsonOptions = new()
-    {
+        {
             PropertyNameCaseInsensitive = true,
             Converters = { new DateTimeConverterHelper() }
-    };
+        };
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
     {
         try
         {
-            loadingStatus = "Buscando dados da API...";
+            isLoading = true;
+            loadingStatus = "Conectando com a API...";
+            await InvokeAsync(StateHasChanged);
+
+            await Task.Delay(500); 
+
+            loadingStatus = "Buscando dados dos eventos...";
             await InvokeAsync(StateHasChanged);
 
             events = await Http.GetFromJsonAsync<List<EventDTO>>("event/all", jsonOptions);
+
+            loadingStatus = "Processando dados...";
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"EXCEÇÃO CAPTURADA: {ex.ToString()}");
-            loadingStatus = $"Ocorreu um erro: {ex.Message}";
+            loadingStatus = $"Erro ao carregar eventos: {ex.Message}";
         }
         finally
         {
             isLoading = false;
+            await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task ReloadEvents()
+    {
+        await LoadEvents();
     }
 }

@@ -2,38 +2,110 @@
 @using EventFlow.Core.Models.DTOs
 @inject HttpClient Http
 
-<PageTitle>Organizadores</PageTitle>
+<PageTitle>Organizadores - EventFlow</PageTitle>
 
-<h1>Organizadores</h1>
+<LayoutHeader Title="Organizadores">
+    <button class="btn btn-primary btn-sm">+ Novo Organizador</button>
+</LayoutHeader>
 
-@if (isLoading)
-{
-    <p><em>@loadingStatus</em></p>
-}
-else if (organizers == null || organizers.Count == 0)
-{
-    <p>Nenhum organizador encontrado ou falha ao carregar.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var organizer in organizers)
-            {
-                <tr>
-                    <td>@organizer.Name</td>
-                    <td>@organizer.Email</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<link href="css/Organizers.css" rel="stylesheet" />
+
+<div class="fade-in">
+    <div class="card-header">
+        <h1 class="card-title">👥 Organizadores</h1>
+        <p class="mb-0">Gerencie e visualize todos os organizadores de eventos</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">@loadingStatus</p>
+        </div>
+    }
+    else if (organizers == null || organizers.Count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <h3>Nenhum organizador encontrado</h3>
+            <p>Não há organizadores cadastrados no momento ou ocorreu uma falha ao carregar os dados.</p>
+            <button class="btn btn-primary" @onclick="ReloadOrganizers">
+                🔄 Tentar Novamente
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Lista de Organizadores</h2>
+                <div class="badge badge-primary">@organizers.Count organizador(es)</div>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>👤 Nome</th>
+                            <th>📧 Email</th>
+                            <th>📊 Status</th>
+                            <th>🎯 Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var organizer in organizers)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-placeholder">
+                                            @GetInitials(organizer.Name)
+                                        </div>
+                                        <div class="ms-3">
+                                            <strong>@organizer.Name</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="mailto:@organizer.Email" class="text-decoration-none">
+                                        @organizer.Email
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">Ativo</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary me-2">
+                                        👁️ Ver Detalhes
+                                    </button>
+                                    <button class="btn btn-sm btn-primary">
+                                        ✏️ Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">📈 Estatísticas dos Organizadores</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-6 text-center">
+                    <h4 class="text-primary">@organizers.Count</h4>
+                    <p>Total de Organizadores</p>
+                </div>
+                <div class="col-md-6 text-center">
+                    <h4 class="text-success">@organizers.Count</h4>
+                    <p>Organizadores Ativos</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private List<OrganizerDTO>? organizers;
@@ -48,21 +120,48 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadOrganizers();
+    }
+
+    private async Task LoadOrganizers()
+    {
         try
         {
-            loadingStatus = "Buscando dados da API...";
+            isLoading = true;
+            loadingStatus = "Conectando com a API...";
+            await InvokeAsync(StateHasChanged);
+
+            await Task.Delay(300);
+
+            loadingStatus = "Buscando dados dos organizadores...";
             await InvokeAsync(StateHasChanged);
 
             organizers = await Http.GetFromJsonAsync<List<OrganizerDTO>>("organizer/all", jsonOptions);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"EXCEÇÃO CAPTURADA: {ex.ToString()}");
-            loadingStatus = $"Ocorreu um erro: {ex.Message}";
+            Console.WriteLine($"EXCEÇÃO CAPTURADA: {ex}");
+            loadingStatus = $"Erro ao carregar organizadores: {ex.Message}";
         }
         finally
         {
             isLoading = false;
+            await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task ReloadOrganizers()
+    {
+        await LoadOrganizers();
+    }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "??";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+
+        return (parts[0][0].ToString() + parts[^1][0]).ToUpper();
     }
 }

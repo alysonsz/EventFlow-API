@@ -1,41 +1,42 @@
 ﻿@page "/speakers"
 @using EventFlow.Core.Models.DTOs
+@using EventFlow.WebApp.Helpers
 @inject HttpClient Http
 
 <PageTitle>Palestrantes</PageTitle>
 
-<h1>Palestrantes</h1>
+<div class="container py-4">
+    <h1 class="mb-4">Nossos Palestrantes</h1>
 
-@if (isLoading)
-{
-    <p><em>@loadingStatus</em></p>
-}
-else if (speakers == null || speakers.Count == 0)
-{
-    <p>Nenhum palestrante encontrado ou falha ao carregar.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Bio</th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (speakers == null)
+    {
+        <p><em>Carregando...</em></p>
+    }
+    else if (speakers.Count == 0)
+    {
+        <p>Nenhum palestrante encontrado.</p>
+    }
+    else
+    {
+        <div class="speaker-grid">
             @foreach (var speaker in speakers)
             {
-                <tr>
-                    <td>@speaker.Name</td>
-                    <td>@speaker.Email</td>
-                    <td>@speaker.Biography</td>
-                </tr>
+                <div class="speaker-card">
+                    <img src="https://i.pravatar.cc/150?u=@speaker.Email" class="card-avatar" alt="Avatar do Palestrante">
+                    <div class="card-body">
+                        <h4 class="card-title">@speaker.Name</h4>
+                        <p class="card-bio">"@speaker.Biography"</p>
+                        <p class="card-info">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>@speaker.Email</span>
+                        </p>
+                        <a href="#" class="btn btn-outline-primary mt-3">Ver Detalhes</a>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
+        </div>
+    }
+</div>
 
 @code {
     private List<SpeakerDTO>? speakers;
