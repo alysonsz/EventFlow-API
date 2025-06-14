@@ -7,4 +7,5 @@ public interface IOrganizerRepository
     Task<int> DeleteAsync(int id);
     Task<Organizer?> GetOrganizerByIdAsync(int id);
     Task<PagedResult<Organizer>> GetAllOrganizersAsync(QueryParameters queryParameters);
+    Task<int> OrganizerCountAsync();
 }

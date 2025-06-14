@@ -73,4 +73,9 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
         await context.SpeakerEvents.AddAsync(speakerEvent);
         await context.SaveChangesAsync();
     }
+
+    public async Task<int> SpeakerCountAsync()
+    {
+        return await context.Speaker.CountAsync();
+    }
 }

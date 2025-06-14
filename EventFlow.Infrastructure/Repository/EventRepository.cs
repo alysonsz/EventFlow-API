@@ -1,4 +1,5 @@
 ﻿using EventFlow.Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventFlow.Infrastructure.Repository;
 
@@ -79,5 +80,10 @@ public class EventRepository(EventFlowContext context) : IEventRepository
         .ToListAsync();
 
         return new PagedResult<Event>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
+    }
+
+    public async Task<int> EventCountAsync()
+    {
+        return await context.Event.CountAsync();
     }
 }

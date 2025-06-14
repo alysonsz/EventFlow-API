@@ -7,4 +7,5 @@ public interface IParticipantRepository
     Task<int> DeleteAsync(int id);
     Task<Participant?> GetParticipantByIdAsync(int id);
     Task<PagedResult<Participant>> GetAllParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters);
+    Task<int> ParticipantCountAsync();
 }

@@ -65,4 +65,9 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
 
         return new PagedResult<Organizer>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
     }
+
+    public async Task<int> OrganizerCountAsync()
+    {
+        return await context.Organizer.CountAsync();
+    }
 }

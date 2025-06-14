@@ -8,4 +8,5 @@ public interface ISpeakerRepository
     Task<Speaker?> GetSpeakerByIdAsync(int id);
     Task<PagedResult<Speaker>> GetAllSpeakersAsync(QueryParameters queryParameters);
     Task AddSpeakerEventAsync(SpeakerEvent speakerEvent);
+    Task<int> SpeakerCountAsync();
 }

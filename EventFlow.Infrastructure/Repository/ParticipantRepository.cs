@@ -67,4 +67,9 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
 
         return new PagedResult<Participant>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
     }
+
+    public async Task<int> ParticipantCountAsync()
+    {
+        return await context.Participant.CountAsync();
+    }
 }

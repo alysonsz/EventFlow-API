@@ -8,4 +8,5 @@ public interface IEventRepository
     Task<Event?> GetEventByIdAsync(int id);
     Task<Event?> GetEventWithDetailsByIdAsync(int id);
     Task<PagedResult<Event>> GetAllEventsAsync(QueryParameters queryParameters);
+    Task<int> EventCountAsync();
 }
