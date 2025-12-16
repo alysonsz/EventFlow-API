@@ -11,9 +11,9 @@ public class ParticipantService(IParticipantRepository repository, IEventReposit
             null : mapper.Map<ParticipantDTO>(entity);
     }
 
-    public async Task<PagedResult<ParticipantDTO>> GetAllParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
+    public async Task<PagedResult<ParticipantDTO>> GetAllPagedParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
     {
-        var pagedParticipants = await repository.GetAllParticipantsByEventIdAsync(eventId, queryParameters);
+        var pagedParticipants = await repository.GetAllPagedParticipantsByEventIdAsync(eventId, queryParameters);
 
         var participantDtos = mapper.Map<List<ParticipantDTO>>(pagedParticipants.Items);
 
@@ -70,5 +70,11 @@ public class ParticipantService(IParticipantRepository repository, IEventReposit
     {
         var deleted = await repository.DeleteAsync(id);
         return deleted > 0;
+    }
+
+    public async Task<List<ParticipantDTO>> GetAllParticipantsWithEventsAsync()
+    {
+        var allParticipants = await repository.GetAllParticipantsWithEventsAsync();
+        return mapper.Map<List<ParticipantDTO>>(allParticipants);
     }
 }

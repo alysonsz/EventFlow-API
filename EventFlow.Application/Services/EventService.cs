@@ -13,9 +13,15 @@ public class EventService(IEventRepository repository, IMapper mapper) : IEventS
             mapper.Map<EventDTO>(entity);
     }
 
-    public async Task<PagedResult<EventDTO>> GetAllEventsAsync(QueryParameters queryParameters)
+    public async Task<List<EventDTO>> GetAllEventsAsync()
     {
-        var pagedEvents = await repository.GetAllEventsAsync(queryParameters);
+        var events = await repository.GetAllEventsAsync();
+        return mapper.Map<List<EventDTO>>(events);
+    }
+
+    public async Task<PagedResult<EventDTO>> GetAllPagedEventsAsync(QueryParameters queryParameters)
+    {
+        var pagedEvents = await repository.GetAllPagedEventsAsync(queryParameters);
 
         var eventDtos = mapper.Map<List<EventDTO>>(pagedEvents.Items);
 

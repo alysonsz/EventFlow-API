@@ -12,10 +12,15 @@ public class SpeakerService(ISpeakerRepository repository, IEventRepository even
             mapper.Map<SpeakerDTO>(entity);
     }
 
-
-    public async Task<PagedResult<SpeakerDTO>> GetAllSpeakersAsync(QueryParameters queryParameters)
+    public async Task<List<SpeakerDTO>> GetAllSpeakersAsync()
     {
-        var pagedSpeakers = await repository.GetAllSpeakersAsync(queryParameters);
+        var speakers = await repository.GetAllSpeakersAsync();
+        return mapper.Map<List<SpeakerDTO>>(speakers);
+    }
+
+    public async Task<PagedResult<SpeakerDTO>> GetAllPagedSpeakersAsync(QueryParameters queryParameters)
+    {
+        var pagedSpeakers = await repository.GetAllPagedSpeakersAsync(queryParameters);
 
         var speakerDtos = mapper.Map<List<SpeakerDTO>>(pagedSpeakers.Items);
 
