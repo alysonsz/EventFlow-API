@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace EventFlow.Infrastructure.Repository;
+﻿namespace EventFlow.Infrastructure.Repository;
 
 public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
 {
@@ -37,7 +35,13 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<PagedResult<Speaker>> GetAllSpeakersAsync(QueryParameters queryParameters)
+    public async Task<List<Speaker>> GetAllSpeakersAsync()
+    {
+        return await context.Speaker
+            .ToListAsync();
+    }
+
+    public async Task<PagedResult<Speaker>> GetAllPagedSpeakersAsync(QueryParameters queryParameters)
     {
         var query = context.Speaker
             .Include(s => s.SpeakerEvents)

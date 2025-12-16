@@ -6,7 +6,8 @@ public interface ISpeakerRepository
     Task<Speaker> UpdateAsync(Speaker speaker);
     Task<int> DeleteAsync(int id);
     Task<Speaker?> GetSpeakerByIdAsync(int id);
-    Task<PagedResult<Speaker>> GetAllSpeakersAsync(QueryParameters queryParameters);
+    Task<List<Speaker>> GetAllSpeakersAsync();
+    Task<PagedResult<Speaker>> GetAllPagedSpeakersAsync(QueryParameters queryParameters);
     Task AddSpeakerEventAsync(SpeakerEvent speakerEvent);
     Task<int> SpeakerCountAsync();
 }

@@ -38,7 +38,7 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<PagedResult<Participant>> GetAllParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
+    public async Task<PagedResult<Participant>> GetAllPagedParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
     {
         var query = context.Participant
             .Where(p => p.Events!.Any(e => e.Id == eventId))
@@ -66,6 +66,14 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
             .ToListAsync();
 
         return new PagedResult<Participant>(items, queryParameters.PageNumber, queryParameters.PageSize, totalCount);
+    }
+
+    public async Task<List<Participant>> GetAllParticipantsWithEventsAsync()
+    {
+        return await context.Participant
+            .Include(p => p.Events)
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<int> ParticipantCountAsync()

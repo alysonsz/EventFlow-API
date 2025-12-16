@@ -47,7 +47,14 @@ public class EventRepository(EventFlowContext context) : IEventRepository
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
-    public async Task<PagedResult<Event>> GetAllEventsAsync(QueryParameters queryParameters)
+    public async Task<List<Event>> GetAllEventsAsync() 
+    {
+        return await context.Event
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<PagedResult<Event>> GetAllPagedEventsAsync(QueryParameters queryParameters)
     {
         var query = context.Event
             .Include(e => e.Organizer)

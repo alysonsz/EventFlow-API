@@ -36,7 +36,13 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
-    public async Task<PagedResult<Organizer>> GetAllOrganizersAsync(QueryParameters queryParameters)
+    public async Task<List<Organizer>> GetAllOrganizersAsync()
+    {
+        return await context.Organizer
+            .ToListAsync();
+    }
+
+    public async Task<PagedResult<Organizer>> GetAllPagedOrganizersAsync(QueryParameters queryParameters)
     {
         var query = context.Organizer
             .Include(o => o.Events)
