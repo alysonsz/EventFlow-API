@@ -43,6 +43,12 @@ A API proporciona funcionalidades completas para o ciclo de vida de eventos, abr
 - **Moq** (Biblioteca para Mocking de dependências)
 - **FluentAssertions** (Para asserções mais legíveis)
 
+**CI/CD:**
+
+- **GitHub Actions** (dotnet.yml) para automação de build e execução dos testes
+
+- **Validação automática de commits** — apenas mudanças que passam em todos os testes do EventFlow são aceitas antes do merge
+
 ### 🏛️ Arquitetura do Projeto
 
 A solução é organizada em projetos distintos que representam as camadas da Arquitetura Limpa, garantindo a separação de responsabilidades:
