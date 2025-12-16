@@ -133,7 +133,7 @@ public class SpeakerControllerTests
         var pagedResult = new PagedResult<SpeakerDTO>(speakers, 1, 10, 1);
 
         _mockService
-            .Setup(s => s.GetAllSpeakersAsync(It.IsAny<QueryParameters>()))
+            .Setup(s => s.GetAllPagedSpeakersAsync(It.IsAny<QueryParameters>()))
             .ReturnsAsync(pagedResult);
 
         var result = await _controller.GetAllSpeakersAsync(queryParameters);

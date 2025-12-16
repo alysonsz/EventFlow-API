@@ -174,14 +174,14 @@ public class ParticipantServiceTests
     };
 
         _mockParticipantRepository
-            .Setup(r => r.GetAllParticipantsByEventIdAsync(1, queryParameters))
+            .Setup(r => r.GetAllPagedParticipantsByEventIdAsync(1, queryParameters))
             .ReturnsAsync(pagedResult);
 
         _mockMapper
             .Setup(m => m.Map<List<ParticipantDTO>>(participants))
             .Returns(participantDTOs);
 
-        var result = await _service.GetAllParticipantsByEventIdAsync(1, queryParameters);
+        var result = await _service.GetAllPagedParticipantsByEventIdAsync(1, queryParameters);
 
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(1);

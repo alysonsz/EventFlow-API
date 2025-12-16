@@ -134,7 +134,7 @@ public class ParticipantControllerTests
         var pagedResult = new PagedResult<ParticipantDTO>(participants, 1, 10, 1);
 
         _mockService
-            .Setup(s => s.GetAllParticipantsByEventIdAsync(eventId, It.IsAny<QueryParameters>()))
+            .Setup(s => s.GetAllPagedParticipantsByEventIdAsync(eventId, It.IsAny<QueryParameters>()))
             .ReturnsAsync(pagedResult);
 
         var result = await _controller.GetAllParticipantsAsync(eventId, queryParameters);

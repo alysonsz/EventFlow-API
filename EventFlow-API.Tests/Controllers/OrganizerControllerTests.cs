@@ -133,7 +133,7 @@ public class OrganizerControllerTests
         var pagedResult = new PagedResult<OrganizerDTO>(organizers, 1, 10, 1);
 
         _mockService
-            .Setup(s => s.GetAllOrganizersAsync(It.IsAny<QueryParameters>()))
+            .Setup(s => s.GetAllPagedOrganizersAsync(It.IsAny<QueryParameters>()))
             .ReturnsAsync(pagedResult);
 
         var result = await _controller.GetAllOrganizersAsync(queryParameters);

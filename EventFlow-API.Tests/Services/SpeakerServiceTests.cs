@@ -187,14 +187,14 @@ public class SpeakerServiceTests
     };
 
         _mockRepository
-            .Setup(r => r.GetAllSpeakersAsync(queryParameters))
+            .Setup(r => r.GetAllPagedSpeakersAsync(queryParameters))
             .ReturnsAsync(pagedResult);
 
         _mockMapper
             .Setup(m => m.Map<List<SpeakerDTO>>(speakers))
             .Returns(speakerDTOs);
 
-        var result = await _service.GetAllSpeakersAsync(queryParameters);
+        var result = await _service.GetAllPagedSpeakersAsync(queryParameters);
 
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(1);

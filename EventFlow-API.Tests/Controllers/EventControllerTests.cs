@@ -113,7 +113,7 @@ public class EventControllerTests
         var pagedResult = new PagedResult<EventDTO>(emptyList, 1, 10, 0);
 
         _serviceMock
-            .Setup(s => s.GetAllEventsAsync(It.IsAny<QueryParameters>()))
+            .Setup(s => s.GetAllPagedEventsAsync(It.IsAny<QueryParameters>()))
             .ReturnsAsync(pagedResult);
 
         var result = await _controller.GetAllEventsAsync(queryParameters);

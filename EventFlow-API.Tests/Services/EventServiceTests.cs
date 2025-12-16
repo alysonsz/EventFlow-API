@@ -217,10 +217,10 @@ public class EventServiceTests
 
         var pagedResultDto = new PagedResult<EventDTO>(eventsDto, queryParameters.PageNumber, queryParameters.PageSize, totalCount: 1);
 
-        _eventRepoMock.Setup(r => r.GetAllEventsAsync(queryParameters)).ReturnsAsync(pagedResult);
+        _eventRepoMock.Setup(r => r.GetAllPagedEventsAsync(queryParameters)).ReturnsAsync(pagedResult);
         _mapperMock.Setup(m => m.Map<List<EventDTO>>(events)).Returns(eventsDto);
 
-        var result = await _eventService.GetAllEventsAsync(queryParameters);
+        var result = await _eventService.GetAllPagedEventsAsync(queryParameters);
 
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(1);

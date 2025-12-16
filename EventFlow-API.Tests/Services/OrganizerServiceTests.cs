@@ -169,14 +169,14 @@ public class OrganizerServiceTests
     };
 
         _mockOrganizerRepository
-            .Setup(r => r.GetAllOrganizersAsync(queryParameters))
+            .Setup(r => r.GetAllPagedOrganizersAsync(queryParameters))
             .ReturnsAsync(pagedResult);
 
         _mockMapper
             .Setup(m => m.Map<List<OrganizerDTO>>(organizers))
             .Returns(organizerDTOs);
 
-        var result = await _service.GetAllOrganizersAsync(queryParameters);
+        var result = await _service.GetAllPagedOrganizersAsync(queryParameters);
 
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(1);
