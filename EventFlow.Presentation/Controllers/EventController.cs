@@ -125,7 +125,7 @@ public class EventController(IEventService eventService) : ControllerBase
     {
         try
         {
-            var result = await eventService.GetAllEventsAsync(queryParameters);
+            var result = await eventService.GetAllPagedEventsAsync(queryParameters);
 
             if (result.Items.Count == 0)
                 return NotFound();

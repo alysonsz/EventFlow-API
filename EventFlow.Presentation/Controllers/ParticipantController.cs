@@ -153,7 +153,7 @@ public class ParticipantController(IParticipantService participantService) : Con
     {
         try
         {
-            var result = await participantService.GetAllParticipantsByEventIdAsync(eventId, queryParameters);
+            var result = await participantService.GetAllPagedParticipantsByEventIdAsync(eventId, queryParameters);
 
             if (result.Items.Count == 0)
                 return NotFound("Nenhum participante encontrado para este evento com os critérios fornecidos.");

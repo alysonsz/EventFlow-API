@@ -154,7 +154,7 @@ public class OrganizerController(IOrganizerService organizerService) : Controlle
     {
         try
         {
-            var result = await organizerService.GetAllOrganizersAsync(queryParameters);
+            var result = await organizerService.GetAllPagedOrganizersAsync(queryParameters);
 
             if (result.Items.Count == 0)
                 return NotFound("Nenhum organizador encontrado com os critérios fornecidos.");

@@ -148,7 +148,7 @@ public class SpeakerController(ISpeakerService speakerService) : ControllerBase
     {
         try
         {
-            var result = await speakerService.GetAllSpeakersAsync(queryParameters);
+            var result = await speakerService.GetAllPagedSpeakersAsync(queryParameters);
 
             if (result.Items.Count == 0)
                 return NotFound("Nenhum palestrante encontrado com os critérios fornecidos.");
