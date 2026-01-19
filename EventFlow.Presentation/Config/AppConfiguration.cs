@@ -17,14 +17,17 @@ namespace EventFlow.Presentation.Config;
 
 public static class AppConfiguration
 {
-    public static IServiceCollection AddDbContextConfig(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDbContextConfig(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         var ConnectionString = configuration.GetConnectionString("DevConnectionString");
 
         services.AddDbContext<EventFlowContext>(options =>
         {
-            options.UseSqlServer(ConnectionString);
-            options.EnableSensitiveDataLogging(true);
+            if (isDevelopment)
+            {
+                options.EnableSensitiveDataLogging(true);
+                options.EnableDetailedErrors(true);
+            }
         });
 
         return services;

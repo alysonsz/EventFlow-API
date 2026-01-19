@@ -1,15 +1,19 @@
 using EventFlow.Presentation.Config;
 using EventFlow.Infrastructure.Data;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 AppConfiguration.ConfigureMvc(builder);
 
 builder.Services.ConfigureSwagger();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContextConfig(builder.Configuration);
+builder.Services.AddDbContextConfig(builder.Configuration, builder.Environment.IsDevelopment());
 builder.Services.AddDependencyInjectionConfig();
 
 builder.Services
@@ -45,10 +49,11 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrações automáticas.");
+        Log.Fatal(ex, "Ocorreu um erro ao aplicar as migrações automáticas.");
     }
 }
+
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
@@ -61,4 +66,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
+
+try
+{
+    Log.Information("Iniciando Web API...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "A API caiu inesperadamente.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

@@ -13,9 +13,18 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8079
       - ConnectionStrings__DevConnectionString=Server=eventflow-db;Database=EventFlow;User Id=sa;Password=MyStrongPassword123!;TrustServerCertificate=True;
+      - Jwt__Issuer=EventFlowApi
+      - Jwt__Audience=EventFlowClient
+      - Jwt__Key=UmaChaveMuitoSecretaEMuitoLongaParaDev123!
+      - Serilog__WriteTo__1__Args__serverUrl=http://eventflow-seq:5341
+      - ASPNETCORE_DataProtection__KeyManagement__XmlRepository__Directory=/root/.aspnet/DataProtection-Keys
     depends_on:
       eventflow-db:
         condition: service_healthy
+      eventflow-seq:
+        condition: service_started
+    volumes:
+    - eventflow_keys:/root/.aspnet/DataProtection-Keys
     networks:
       - eventflow-network
 
@@ -38,8 +47,20 @@ services:
     networks:
       - eventflow-network
 
+  eventflow-seq:
+    image: datalust/seq:latest
+    container_name: eventflow-seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=MyStrongPassword123!
+    ports:
+      - "5341:80"
+    networks:
+      - eventflow-network
+
 volumes:
   eventflow_sql_data:
+  eventflow_keys:
 
 networks:
   eventflow-network:
