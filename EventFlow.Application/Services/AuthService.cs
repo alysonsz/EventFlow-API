@@ -51,6 +51,8 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
                 new Claim(ClaimTypes.Email, user.Email)
             }),
             Expires = DateTime.UtcNow.AddHours(4),
+            Issuer = configuration["Jwt:Issuer"],
+            Audience = configuration["Jwt:Audience"],
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature
