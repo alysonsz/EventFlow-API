@@ -23,6 +23,8 @@ public static class AppConfiguration
 
         services.AddDbContext<EventFlowContext>(options =>
         {
+            options.UseSqlServer(ConnectionString);
+
             if (isDevelopment)
             {
                 options.EnableSensitiveDataLogging(true);
