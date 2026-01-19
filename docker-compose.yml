@@ -1,0 +1,46 @@
+﻿version: '3.8'
+
+services:
+  eventflow-api:
+    container_name: eventflow-api
+    image: eventflowapi:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8079:8079"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8079
+      - ConnectionStrings__DevConnectionString=Server=eventflow-db;Database=EventFlow;User Id=sa;Password=MyStrongPassword123!;TrustServerCertificate=True;
+    depends_on:
+      eventflow-db:
+        condition: service_healthy
+    networks:
+      - eventflow-network
+
+  eventflow-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: eventflow-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MyStrongPassword123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - eventflow_sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'MyStrongPassword123!' -Q 'SELECT 1' -C || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - eventflow-network
+
+volumes:
+  eventflow_sql_data:
+
+networks:
+  eventflow-network:
+    driver: bridge
