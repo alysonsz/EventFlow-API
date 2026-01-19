@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "Backend",
+    "Projects": [
+      {
+        "Path": "EventFlow.Presentation\\EventFlow.Presentation.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
