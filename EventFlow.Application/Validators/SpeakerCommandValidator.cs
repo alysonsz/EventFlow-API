@@ -16,8 +16,5 @@ public class SpeakerCommandValidator : AbstractValidator<SpeakerCommand>
         RuleFor(x => x.Biography)
             .NotEmpty().WithMessage("A biografia do palestrante é obrigatória.")
             .MaximumLength(2000).WithMessage("A biografia deve ter no máximo 2000 caracteres.");
-
-        RuleFor(x => x.EventId)
-            .GreaterThan(0).WithMessage("O ID do evento é obrigatório e deve ser maior que zero.");
     }
 }
