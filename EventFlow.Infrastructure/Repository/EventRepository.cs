@@ -1,7 +1,4 @@
-﻿using EventFlow.Core.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace EventFlow.Infrastructure.Repository;
+﻿namespace EventFlow.Infrastructure.Repository;
 
 public class EventRepository(EventFlowContext context) : IEventRepository
 {
@@ -47,7 +44,7 @@ public class EventRepository(EventFlowContext context) : IEventRepository
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
-    public async Task<List<Event>> GetAllEventsAsync() 
+    public async Task<List<Event>> GetAllEventsAsync()
     {
         return await context.Event
             .AsNoTracking()

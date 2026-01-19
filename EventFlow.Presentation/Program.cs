@@ -1,18 +1,8 @@
 using EventFlow.Presentation.Config;
+using EventFlow.Infrastructure.Data;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazorApp",
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:7091", "http://localhost:5082")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
-});
 
 AppConfiguration.ConfigureMvc(builder);
 
@@ -47,8 +37,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseCors("AllowBlazorApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

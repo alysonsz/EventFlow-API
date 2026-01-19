@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace EventFlow.Infrastructure.Repository;
+﻿namespace EventFlow.Infrastructure.Repository;
 
 public class OrganizerRepository(EventFlowContext context) : IOrganizerRepository
 {
@@ -60,7 +58,7 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
         query = queryParameters.SortBy?.ToLowerInvariant() switch
         {
             "name_desc" => query.OrderByDescending(o => o.Name),
-            _ => query.OrderBy(o => o.Name) 
+            _ => query.OrderBy(o => o.Name)
         };
 
         var totalCount = await query.CountAsync();

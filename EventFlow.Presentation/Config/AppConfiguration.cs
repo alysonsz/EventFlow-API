@@ -1,6 +1,7 @@
 ﻿using EventFlow.Application.Services;
 using EventFlow.Application.Validators;
 using EventFlow.Core.Repository.Interfaces;
+using EventFlow.Infrastructure.Data;
 using EventFlow.Infrastructure.Helpers;
 using EventFlow.Infrastructure.Profiles;
 using EventFlow.Infrastructure.Repository;
