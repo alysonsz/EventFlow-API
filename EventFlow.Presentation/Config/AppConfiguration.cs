@@ -12,6 +12,13 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using System.IO.Compression;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text;
+using Serilog; 
+using OpenTelemetry.Resources; 
+using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
 
 namespace EventFlow.Presentation.Config;
 
@@ -109,9 +116,9 @@ public static class AppConfiguration
 
             options.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
+            {
             { securityScheme, Array.Empty<string>() }
-        });
+            });
         });
 
         return services;
@@ -126,5 +133,66 @@ public static class AppConfiguration
         });
 
         return services;
+    }
+
+    public static IServiceCollection AddOpenTelemetryConfig(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource
+                .AddService("EventFlow.API"))
+            .WithTracing(tracing => tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation()
+                .AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri("http://eventflow-jaeger:4317");
+                    options.Protocol = OtlpExportProtocol.Grpc;
+                }));
+
+        return services;
+    }
+
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!))
+                };
+            });
+
+        return services;
+    }
+
+    public static void ApplyDatabaseMigrations(this IApplicationBuilder app)
+    {
+        using (var scope = app.ApplicationServices.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<EventFlowContext>();
+
+                if (context.Database.GetPendingMigrations().Any())
+                {
+                    context.Database.Migrate();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Ocorreu um erro ao aplicar as migrações automáticas.");
+            }
+        }
     }
 }
