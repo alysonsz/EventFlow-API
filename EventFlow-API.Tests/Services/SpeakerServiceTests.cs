@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EventFlow.Core.Repository.Interfaces;
 using EventFlow.Infrastructure.Data;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace EventFlow_API.Tests.Services;
 
@@ -10,18 +11,20 @@ public class SpeakerServiceTests
     private readonly Mock<ISpeakerRepository> _mockRepository;
     private readonly Mock<IEventRepository> _mockEventRepository;
     private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IDistributedCache> _mockCache;
 
     public SpeakerServiceTests()
     {
         _mockRepository = new Mock<ISpeakerRepository>();
         _mockEventRepository = new Mock<IEventRepository>();
         _mockMapper = new Mock<IMapper>();
+        _mockCache = new Mock<IDistributedCache>();
 
         var options = new DbContextOptionsBuilder<EventFlowContext>()
         .UseInMemoryDatabase(databaseName: "TestDatabase")
         .Options;
 
-        _service = new SpeakerService(_mockRepository.Object, _mockEventRepository.Object, _mockMapper.Object);
+        _service = new SpeakerService(_mockRepository.Object, _mockEventRepository.Object, _mockMapper.Object, _mockCache.Object);
     }
 
     [Fact]

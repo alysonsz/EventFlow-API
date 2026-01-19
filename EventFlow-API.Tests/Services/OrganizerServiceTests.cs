@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EventFlow.Core.Repository.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace EventFlow_API.Tests.Services;
 
@@ -9,13 +10,15 @@ public class OrganizerServiceTests
     private readonly Mock<IOrganizerRepository> _mockOrganizerRepository;
     private readonly Mock<IEventRepository> _mockEventRepository;
     private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IDistributedCache> _mockCache;
 
     public OrganizerServiceTests()
     {
         _mockOrganizerRepository = new Mock<IOrganizerRepository>();
         _mockEventRepository = new Mock<IEventRepository>();
         _mockMapper = new Mock<IMapper>();
-        _service = new OrganizerService(_mockOrganizerRepository.Object, _mockEventRepository.Object, _mockMapper.Object);
+        _mockCache = new Mock<IDistributedCache>();
+        _service = new OrganizerService(_mockOrganizerRepository.Object, _mockEventRepository.Object, _mockMapper.Object, _mockCache.Object);
     }
 
     [Fact]
