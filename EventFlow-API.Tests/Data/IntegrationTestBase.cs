@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using EventFlow.Infrastructure.Data;
+using Microsoft.Data.Sqlite;
 
 namespace EventFlow_API.Tests.Data;
 

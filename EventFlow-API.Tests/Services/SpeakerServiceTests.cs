@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EventFlow.Core.Repository.Interfaces;
+using EventFlow.Infrastructure.Data;
 
 namespace EventFlow_API.Tests.Services;
 

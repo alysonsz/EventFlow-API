@@ -6,6 +6,7 @@ public class Speaker
     public string Name { get; set; }
     public string? Biography { get; set; }
     public string Email { get; set; }
+    public string? Expertise { get; set; }
     public ICollection<SpeakerEvent> SpeakerEvents { get; set; } = [];
 
 }

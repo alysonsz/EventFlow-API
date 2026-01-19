@@ -12,7 +12,6 @@ public class EventMap : IEntityTypeConfiguration<Event>
             .UseIdentityColumn();
 
         builder.Property(x => x.Title)
-            .IsRequired()
             .HasColumnName("Title")
             .HasColumnType("VARCHAR")
             .HasMaxLength(200);
@@ -23,19 +22,22 @@ public class EventMap : IEntityTypeConfiguration<Event>
             .HasMaxLength(8000);
 
         builder.Property(x => x.Date)
-            .IsRequired()
             .HasColumnName("Date")
             .HasColumnType("DATETIME");
 
         builder.Property(x => x.Location)
-            .IsRequired()
             .HasColumnName("Location")
-            .HasColumnType("VARCHAR");
+            .HasColumnType("VARCHAR")
+            .HasMaxLength(150);
 
         builder.Property(x => x.OrganizerId)
-            .IsRequired()
             .HasColumnName("OrganizerId")
             .HasColumnType("INT");
+
+        builder.Property(x => x.Category)
+            .HasColumnName("Category")
+            .HasColumnType("VARCHAR")
+            .HasMaxLength(150);
 
         builder
             .HasMany(e => e.SpeakerEvents)
@@ -52,7 +54,7 @@ public class EventMap : IEntityTypeConfiguration<Event>
         builder
             .HasMany(e => e.Participants)
             .WithMany(p => p.Events)
-            .UsingEntity("EventParticipant");
+            .UsingEntity(j => j.ToTable("EventParticipant"));
     }
 }
 

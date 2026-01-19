@@ -9,7 +9,6 @@ public class SpeakerEventMap : IEntityTypeConfiguration<SpeakerEvent>
         builder.HasKey(se => new { se.SpeakerId, se.EventId });
 
         builder.Property(se => se.RegisteredAt)
-            .IsRequired()
             .HasColumnType("DATETIME");
 
         builder.HasOne(se => se.Speaker)

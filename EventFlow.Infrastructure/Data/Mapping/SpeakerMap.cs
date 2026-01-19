@@ -12,20 +12,22 @@ public class SpeakerMap : IEntityTypeConfiguration<Speaker>
             .UseIdentityColumn();
 
         builder.Property(x => x.Name)
-            .IsRequired()
             .HasColumnName("Name")
             .HasColumnType("VARCHAR")
             .HasMaxLength(200);
 
         builder.Property(x => x.Biography)
-            .IsRequired()
             .HasColumnName("Biography")
             .HasColumnType("VARCHAR")
             .HasMaxLength(2000);
 
         builder.Property(x => x.Email)
-            .IsRequired()
             .HasColumnName("Email")
+            .HasColumnType("VARCHAR")
+            .HasMaxLength(150);
+
+        builder.Property(x => x.Expertise)
+            .HasColumnName("Expertise")
             .HasColumnType("VARCHAR")
             .HasMaxLength(150);
 

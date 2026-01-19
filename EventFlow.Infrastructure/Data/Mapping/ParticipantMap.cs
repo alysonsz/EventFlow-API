@@ -12,14 +12,17 @@ public class ParticipantMap : IEntityTypeConfiguration<Participant>
             .UseIdentityColumn();
 
         builder.Property(x => x.Name)
-            .IsRequired()
             .HasColumnName("Name")
             .HasColumnType("VARCHAR")
             .HasMaxLength(200);
 
         builder.Property(x => x.Email)
-            .IsRequired()
             .HasColumnName("Email")
+            .HasColumnType("VARCHAR")
+            .HasMaxLength(150);
+
+        builder.Property(x => x.Interests)
+            .HasColumnName("Interests")
             .HasColumnType("VARCHAR")
             .HasMaxLength(150);
 

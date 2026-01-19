@@ -1,12 +1,9 @@
 ﻿using EventFlow.Infrastructure.Data.Mapping;
 
-public class EventFlowContext : DbContext
-{
-    public EventFlowContext(DbContextOptions<EventFlowContext> options)
-        : base(options)
-    {
-    }
+namespace EventFlow.Infrastructure.Data;
 
+public class EventFlowContext(DbContextOptions<EventFlowContext> options) : DbContext(options)
+{
     public DbSet<Event> Event { get; set; } = null!;
     public DbSet<Organizer> Organizer { get; set; } = null!;
     public DbSet<Participant> Participant { get; set; } = null!;
@@ -21,5 +18,6 @@ public class EventFlowContext : DbContext
         builder.ApplyConfiguration(new ParticipantMap());
         builder.ApplyConfiguration(new SpeakerMap());
         builder.ApplyConfiguration(new SpeakerEventMap());
+        builder.ApplyConfiguration(new UserMap());
     }
 }
