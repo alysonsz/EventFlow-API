@@ -1,6 +1,4 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   eventflow-api:
     container_name: eventflow-api
     image: eventflowapi:latest
@@ -35,7 +33,7 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=MyStrongPassword123!
     ports:
-      - "1433:1433"
+      - "1434:1434"
     volumes:
       - eventflow_sql_data:/var/opt/mssql
     healthcheck:
@@ -55,6 +53,17 @@ services:
       - SEQ_FIRSTRUN_ADMINPASSWORD=MyStrongPassword123!
     ports:
       - "5341:80"
+    networks:
+      - eventflow-network
+
+  eventflow-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: eventflow-jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "4317:4317"
     networks:
       - eventflow-network
 

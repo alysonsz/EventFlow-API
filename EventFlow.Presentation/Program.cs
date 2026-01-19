@@ -2,6 +2,9 @@ using EventFlow.Presentation.Config;
 using EventFlow.Infrastructure.Data;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,20 @@ builder.Services.ConfigureSwagger();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextConfig(builder.Configuration, builder.Environment.IsDevelopment());
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("EventFlow.API"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation()
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri("http://eventflow-jaeger:4317");
+            options.Protocol = OtlpExportProtocol.Grpc;
+        }));
+
 builder.Services.AddDependencyInjectionConfig();
 
 builder.Services
