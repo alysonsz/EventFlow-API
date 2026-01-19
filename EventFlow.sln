@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventFlow.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventFlow.Presentation", "EventFlow.Presentation\EventFlow.Presentation.csproj", "{1981CA31-527D-48E2-0270-948FDEDFEE06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventFlow.WebApp", "EventFlow.WebApp\EventFlow.WebApp.csproj", "{FC0E5303-4051-492B-A758-84904FCD0BCD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,18 +93,6 @@ Global
 		{1981CA31-527D-48E2-0270-948FDEDFEE06}.Release|x64.Build.0 = Release|Any CPU
 		{1981CA31-527D-48E2-0270-948FDEDFEE06}.Release|x86.ActiveCfg = Release|Any CPU
 		{1981CA31-527D-48E2-0270-948FDEDFEE06}.Release|x86.Build.0 = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|x64.Build.0 = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Debug|x86.Build.0 = Debug|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|x64.ActiveCfg = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|x64.Build.0 = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|x86.ActiveCfg = Release|Any CPU
-		{FC0E5303-4051-492B-A758-84904FCD0BCD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
