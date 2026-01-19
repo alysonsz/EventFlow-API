@@ -1,15 +1,37 @@
 ﻿using EventFlow.Core.Models.DTOs;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace EventFlow.Application.Services;
 
-public class OrganizerService(IOrganizerRepository repository, IEventRepository eventRepository, IMapper mapper) : IOrganizerService
+public class OrganizerService(IOrganizerRepository repository, IEventRepository eventRepository, 
+    IMapper mapper, IDistributedCache cache) : IOrganizerService
 {
     public async Task<OrganizerDTO?> GetByIdAsync(int id)
     {
+        string cacheKey = $"organizer-{id}";
+
+        var cachedData = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedData))
+        {
+            return JsonSerializer.Deserialize<OrganizerDTO>(cachedData)!;
+        }
+
         var entity = await repository.GetOrganizerByIdAsync(id);
-        return entity is null ?
-            null :
-            mapper.Map<OrganizerDTO>(entity);
+
+        if (entity == null)
+            return null;
+
+        var dto = mapper.Map<OrganizerDTO>(entity);
+
+        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(dto),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            });
+
+        return dto;
     }
 
     public async Task<List<OrganizerDTO>> GetAllOrganizersAsync()
@@ -68,14 +90,21 @@ public class OrganizerService(IOrganizerRepository repository, IEventRepository 
         existing.Email = command.Email;
 
         var updated = await repository.UpdateAsync(existing);
-        return updated is null ?
-            null :
-            mapper.Map<OrganizerDTO>(updated);
+
+        await cache.RemoveAsync($"organizer-{id}");
+
+        return updated is null ? null : mapper.Map<OrganizerDTO>(updated);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
         var deleted = await repository.DeleteAsync(id);
+
+        if (deleted > 0)
+        {
+            await cache.RemoveAsync($"organizer-{id}");
+        }
+        
         return deleted > 0;
     }
 }

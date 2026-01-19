@@ -66,6 +66,14 @@
       - "4317:4317"
     networks:
       - eventflow-network
+      
+  eventflow-redis:
+    image: redis:alpine
+    container_name: eventflow-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - eventflow-network
 
 volumes:
   eventflow_sql_data:

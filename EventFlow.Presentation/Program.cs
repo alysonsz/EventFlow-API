@@ -17,6 +17,7 @@ builder.Services.ConfigureSwagger();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextConfig(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.AddRedisCacheConfig();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource

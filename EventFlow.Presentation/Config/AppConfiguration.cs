@@ -23,7 +23,13 @@ public static class AppConfiguration
 
         services.AddDbContext<EventFlowContext>(options =>
         {
-            options.UseSqlServer(ConnectionString);
+            options.UseSqlServer(ConnectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorNumbersToAdd: null);
+            });
 
             if (isDevelopment)
             {
@@ -106,6 +112,17 @@ public static class AppConfiguration
         {
             { securityScheme, Array.Empty<string>() }
         });
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedisCacheConfig(this IServiceCollection services)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = "eventflow-redis:6379";
+            options.InstanceName = "EventFlow_";
         });
 
         return services;

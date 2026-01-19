@@ -1,14 +1,37 @@
 ﻿using EventFlow.Core.Models.DTOs;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace EventFlow.Application.Services;
 
-public class ParticipantService(IParticipantRepository repository, IEventRepository eventRepository, IMapper mapper) : IParticipantService
+public class ParticipantService(IParticipantRepository repository, IEventRepository eventRepository, 
+    IMapper mapper, IDistributedCache cache) : IParticipantService
 {
     public async Task<ParticipantDTO?> GetByIdAsync(int id)
     {
+        string cacheKey = $"participant-{id}";
+
+        var cachedData = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedData))
+        {
+            return JsonSerializer.Deserialize<ParticipantDTO>(cachedData)!;
+        }
+
         var entity = await repository.GetParticipantByIdAsync(id);
-        return entity is null ?
-            null : mapper.Map<ParticipantDTO>(entity);
+
+        if (entity == null)
+            return null;
+
+        var dto = mapper.Map<ParticipantDTO>(entity);
+
+        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(dto),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            });
+
+        return dto;
     }
 
     public async Task<PagedResult<ParticipantDTO>> GetAllPagedParticipantsByEventIdAsync(int eventId, QueryParameters queryParameters)
@@ -47,6 +70,8 @@ public class ParticipantService(IParticipantRepository repository, IEventReposit
         participant.Events!.Add(evento);
         await repository.UpdateAsync(participant);
 
+        await cache.RemoveAsync($"participant-{participantId}");
+
         return true;
     }
 
@@ -61,14 +86,21 @@ public class ParticipantService(IParticipantRepository repository, IEventReposit
         existing.Email = command.Email;
 
         var updated = await repository.UpdateAsync(existing);
-        return updated is null ?
-            null :
-            mapper.Map<ParticipantDTO>(updated);
+
+        await cache.RemoveAsync($"participant-{id}");
+
+        return updated is null ? null : mapper.Map<ParticipantDTO>(updated);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
         var deleted = await repository.DeleteAsync(id);
+        
+        if (deleted > 0)
+        {
+            await cache.RemoveAsync($"participant-{id}");
+        }
+
         return deleted > 0;
     }
 
