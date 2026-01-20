@@ -101,11 +101,11 @@ Aguarde alguns segundos até que todos os containers estejam prontos.
 
 ## Acesso aos Serviços
 
-| Serviço | URL | Descrição |
-|-------|-----|-----------|
-| **Swagger** | http://localhost:8079/swagger | Documentação e testes da API |
-| **Jaeger UI** | http://localhost:16686 | Tracing e análise de performance |
-| **Seq Logs** | http://localhost:5341 | Logs estruturados em tempo real |
+| Serviço | URL | Descrição | Credenciais (se houver) |
+|-------|-----|-----------|-------------|
+| **Swagger** | http://localhost:8079/swagger | Documentação e testes da API | - |
+| **Jaeger UI** | http://localhost:16686 | Tracing e análise de performance | - |
+| **Seq Logs** | http://localhost:5341 | Logs estruturados em tempo real | User: `admin` <br> Pass: `MyStrongPassword123!` |
 
 ---
 
