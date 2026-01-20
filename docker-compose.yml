@@ -1,10 +1,7 @@
 ﻿services:
   eventflow-api:
     container_name: eventflow-api
-    image: eventflowapi:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: alysonsz/eventflow-api:v1.0.0
     ports:
       - "8079:8079"
     environment:
@@ -39,9 +36,9 @@
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'MyStrongPassword123!' -Q 'SELECT 1' -C || exit 1"]
       interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
     networks:
       - eventflow-network
 
