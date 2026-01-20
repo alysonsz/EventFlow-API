@@ -1,247 +1,163 @@
-# EventFlow API
+# EventFlow API — Enterprise Event Management
 
-### 📌 Descrição do Projeto
+O **EventFlow API** é uma solução de back-end **robusta, escalável e orientada a produção** para gestão de eventos, desenvolvida em **.NET 8** e estruturada segundo os princípios da **Clean Architecture**.
 
-O ***EventFlow API*** é um projeto de API RESTful desenvolvido em .NET 8, projetado para ser uma solução robusta e escalável para a gestão e organização de eventos. O projeto demonstra as melhores práticas de desenvolvimento de software, incluindo a implementação de uma Arquitetura Limpa (Clean Architecture) em camadas, um sistema de autenticação e autorização via JWT, validação de dados com FluentValidation e uma suíte de testes unitários.
-
-OBS: Esse projeto foi pensado para implementação no Google Developers Group (GDG) Aracaju.
-
-A API proporciona funcionalidades completas para o ciclo de vida de eventos, abrangendo o gerenciamento de organizadores, palestrantes e participantes, e o tratamento de relacionamentos complexos (one-to-many e many-to-many).
+Diferente de APIs tradicionais voltadas apenas a CRUD, este projeto foca fortemente em **Observabilidade, Performance e Resiliência**, simulando um ambiente real de produção com **tracing distribuído**, **logs estruturados** e **estratégias de cache**.
 
 ---
 
-### 🚀 Objetivos do Projeto
+## Arquitetura & Design
 
-- Implementar uma **Arquitetura Limpa** desacoplada, com clara separação entre as camadas de Domínio, Aplicação, Infraestrutura e Apresentação.
-- Aplicar práticas recomendadas para uso de **Entity Framework Core**, incluindo mapeamento com Fluent API.
-- Garantir a qualidade e a confiabilidade do código através de **testes unitários** (xUnit, Moq, FluentAssertions).
-- Oferecer uma solução de **autenticação e autorização** segura utilizando JWT.
-- Fornecer uma documentação de API clara e interativa com **Swagger/OpenAPI**.
-- Apresentar um código limpo, organizado e facilmente extensível.
+O projeto foi refatorado para suportar **alta carga**, **baixo acoplamento** e **manutenibilidade a longo prazo**.
 
----
-
-### 🛠️ Tecnologias Utilizadas
-
-**Backend:**
-- .NET 8
-- ASP.NET Core Web API
-- Entity Framework Core (com migrations)
-- SQL Server
-
-**Padrões e Conceitos:**
-- Arquitetura Limpa (Clean Architecture)
-- Injeção de Dependência (DI)
-- Mapeamento de objetos com **AutoMapper**
-- Validação de dados com **FluentValidation**
-- Documentação de API com **Swagger/OpenAPI**
-- Autenticação e Autorização com **JWT (JSON Web Tokens)**
-
-**Testes:**
-
-- **xUnit** (Framework de Teste)
-- **Moq** (Biblioteca para Mocking de dependências)
-- **FluentAssertions** (Para asserções mais legíveis)
-
-**CI/CD:**
-
-- **GitHub Actions** (dotnet.yml) para automação de build e execução dos testes
-
-- **Validação automática de commits** — apenas mudanças que passam em todos os testes do EventFlow são aceitas antes do merge
-
-### 🏛️ Arquitetura do Projeto
-
-A solução é organizada em projetos distintos que representam as camadas da Arquitetura Limpa, garantindo a separação de responsabilidades:
-
-- **EventFlow.Core (Domínio):** O coração da aplicação. Contém as entidades de negócio, DTOs, comandos e as interfaces dos repositórios e serviços. Não depende de nenhuma outra camada.
-- **EventFlow.Application (Aplicação):** Contém a lógica de negócio e os casos de uso. Implementa as interfaces de serviço definidas no Core e orquestra as ações, mas não sabe como os dados são persistidos.
-- **EventFlow.Infrastructure (Infraestrutura):** Contém os detalhes técnicos e as implementações das interfaces do Core. É aqui que reside o acesso ao banco de dados com Entity Framework, implementações de repositórios, helpers, etc.
-- **EventFlow.Presentation (Apresentação):** A camada de entrada da aplicação. Neste caso, é a Web API com seus Controllers, configuração de inicialização (Program.cs), e tudo relacionado ao protocolo HTTP.
-- **EventFlow.Tests (Testes):** Projeto dedicado aos testes unitários das outras camadas.
-
-### 🚧 Próximos Passos
-
-Agora que a base arquitetural está sólida, os próximos passos para evoluir o projeto incluem:
-
-- **Paginação, Ordenação e Filtragem:** Implementar nos endpoints GET All para torná-los escaláveis.
-- **Middleware de Exceções:** Criar um middleware global para tratamento de erros, limpando os controllers.
-- **Autorização por Papéis (Roles):** Adicionar papéis de "Admin" e "Organizer" para proteger endpoints críticos.
-- **Logging Estruturado:** Integrar o Serilog para um logging mais robusto e preparado para produção.
-- **Gerenciamento de Segredos:** Mover segredos (ConnectionString, Jwt:Key) do appsettings.json para User Secrets (desenvolvimento) e Environment Variables (produção).
-- **CI/CD:** Configurar um pipeline de Integração e Entrega Contínua (ex: GitHub Actions).
-
----
-
-### 🔗 Estrutura das Entidades
-
-O projeto atualmente é composto pelas seguintes entidades principais:
-
-- **Event**: Representa o evento em si, com dados como título, descrição, data e local.
-- **Organizer**: Responsável pela organização do evento.
-- **Speaker**: Palestrantes convidados para o evento.
-- **Participant**: Pessoas que participam dos eventos.
-
----
-
-### 📚 Detalhes dos Relacionamentos
-
-- **Organizer → Event** *(One-to-Many)*
-  - Um organizador pode gerenciar múltiplos eventos. Cada evento tem apenas um organizador.
-
-- **Event ↔ Speaker** *(Many-to-Many)*
-  - Um evento pode ter múltiplos palestrantes.
-  - Um palestrante pode participar de múltiplos eventos.
-  - A relação é feita através da entidade SpeakerEvent.
-
-- **Event ↔ Participant** *(Many-to-Many)*
-  - Um evento pode ter vários participantes.
-  - Um participante pode se inscrever em diversos eventos.
-
----
-
-### 📁 Estrutura de Diretórios e Arquivos
-A estrutura de diretórios foi organizada para promover a separação de responsabilidades e facilitar a manutenção.
-
-```
-EventFlow/
-├── EventFlow.sln
-│
-├── 📁 EventFlow.Core
-│   ├── 📁 Commands
-│   │   ├── EventCommand.cs
-│   │   ├── LoginUserCommand.cs
-│   │   ├── OrganizerCommand.cs
-│   │   ├── ParticipantCommand.cs
-│   │   ├── RegisterUserCommand.cs
-│   │   └── SpeakerCommand.cs
-│   ├── 📁 Models
-│   │   ├── 📁 DTOs
-│   │   │   ├── EventDTO.cs
-│   │   │   ├── EventSummaryDTO.cs
-│   │   │   ├── OrganizerDTO.cs
-│   │   │   ├── ParticipantDTO.cs
-│   │   │   ├── SpeakerDTO.cs
-│   │   │   ├── UserDTO.cs
-│   │   │   └── UserPasswordDTO.cs
-│   │   ├── Event.cs
-│   │   ├── Organizer.cs
-│   │   ├── Participant.cs
-│   │   ├── Speaker.cs
-│   │   ├── SpeakerEvent.cs
-│   │   └── User.cs
-│   ├── 📁 Repository
-│   │   └── 📁 Interfaces
-│   │       ├── IEventRepository.cs
-│   │       ├── IOrganizerRepository.cs
-│   │       ├── IParticipantRepository.cs
-│   │       ├── ISpeakerRepository.cs
-│   │       └── IUserRepository.cs
-│   ├── 📁 Services
-│   │   └── 📁 Interfaces
-│   │       ├── IAuthService.cs
-│   │       ├── IEventService.cs
-│   │       ├── IOrganizerService.cs
-│   │       ├── IParticipantService.cs
-│   │       └── ISpeakerService.cs
-│   └── GlobalUsing.cs
-│
-├── 📁 EventFlow.Application
-│   ├── 📁 Services
-│   │   ├── AuthService.cs
-│   │   ├── EventService.cs
-│   │   ├── OrganizerService.cs
-│   │   ├── ParticipantService.cs
-│   │   └── SpeakerService.cs
-│   ├── 📁 Validators
-│   │   ├── EventCommandValidator.cs
-│   │   ├── OrganizerCommandValidator.cs
-│   │   ├── ParticipantCommandValidator.cs
-│   │   └── SpeakerCommandValidator.cs
-│   └── GlobalUsing.cs
-│
-├── 📁 EventFlow.Infrastructure
-│   ├── 📁 Data
-│   │   ├── 📁 Mapping
-│   │   │   ├── EventMap.cs
-│   │   │   ├── OrganizerMap.cs
-│   │   │   ├── ParticipantMap.cs
-│   │   │   ├── SpeakerEventMap.cs
-│   │   │   └── SpeakerMap.cs
-│   │   └── EventFlowContext.cs
-│   ├── 📁 Helpers
-│   │   └── DateTimeConverterHelper.cs
-│   ├── 📁 Profiles
-│   │   └── MappingProfile.cs
-│   ├── 📁 Repository
-│   │   ├── EventRepository.cs
-│   │   ├── OrganizerRepository.cs
-│   │   ├── ParticipantRepository.cs
-│   │   ├── SpeakerRepository.cs
-│   │   └── UserRepository.cs
-│   └── GlobalUsing.cs
-│
-├── 📁 EventFlow.Presentation
-│   ├── 📁 Config
-│   │   └── AppConfiguration.cs
-│   ├── 📁 Controllers
-│   │   ├── AuthController.cs
-│   │   ├── EventController.cs
-│   │   ├── OrganizerController.cs
-│   │   ├── ParticipantController.cs
-│   │   └── SpeakerController.cs
-│   ├── 📁 Properties
-│   │   ├── launchSettings.json
-│   │   └── serviceDependencies.json
-│   ├── appsettings.json
-│   ├── GlobalUsing.cs
-│   └── Program.cs
-│
-├── 📁 EventFlow.Tests
-│   ├── 📁 Data
-│   │   └── IntegrationTestBase.cs
-│   ├── 📁 Controllers
-│   │   ├── EventControllerTests.cs
-│   │   ├── OrganizerControllerTests.cs
-│   │   ├── ParticipantControllerTests.cs
-│   │   └── SpeakerControllerTests.cs
-│   ├── 📁 Services
-│   │   ├── EventServiceTests.cs
-│   │   ├── OrganizerServiceTests.cs
-│   │   ├── ParticipantServiceTests.cs
-│   │   └── SpeakerServiceTests.cs
-│   └── 📁 Validators
-│       ├── EventCommandValidatorTests.cs
-│       ├── OrganizerCommandValidatorTests.cs
-│       ├── ParticipantCommandValidatorTests.cs
-│       └── SpeakerCommandValidatorTests.cs
-│
-├── .dockerignore
-├── .gitignore
-├── Dockerfile
-└── README.md
+```mermaid
+graph TD
+    Client[Cliente / Swagger] -->|HTTP Request| API[EventFlow API]
+    
+    subgraph "Observability Layer"
+        API -.->|Logs| Seq[Seq Dashboard]
+        API -.->|Traces| Jaeger[Jaeger UI]
+    end
+    
+    subgraph "Data & Performance"
+        API <-->|Cache-Aside| Redis[Redis Cache]
+        API <-->|EF Core| SQL[SQL Server]
+    end
 ```
 
 ---
 
-### 📌 Como Rodar o Projeto
+## 🌟 Diferenciais Técnicos
 
-- Clone o repositório
-- No arquivo `appsettings.json` do projeto EventFlow.Presentation, configure sua `ConnectionString` para o banco de dados.
-- No mesmo arquivo, certifique-se de que a `Jwt:Key` está definida.
-- Abra um terminal na pasta raiz da solução (`EventFlow/`).
-- Execute o comando para aplicar as migrations do Entity Framework: `dotnet ef database update --project EventFlow.Infrastructure --startup-project EventFlow.Presentation`
-- Rode o projeto com `dotnet run --project EventFlow.Presentation`
-- Acesse o Swagger em: `https://localhost:7221/swagger` (ou a porta configurada).
-- Para HTTPS utilize a porta 7221 e para HTTP a porta 5041.
+### ⚡ Cache Distribuído (Redis)
+- Implementação do padrão **Cache-Aside**
+- Redução significativa de latência em operações de leitura (ex: `GetById`)
+- Estratégias de **invalidação de cache** para garantir consistência dos dados
+
+### 🔍 Observabilidade Completa
+
+- **Tracing Distribuído** *(OpenTelemetry + Jaeger)*  
+  Rastreamento ponta-a-ponta das requisições para identificar gargalos entre **API, Cache e Banco de Dados**.
+
+- **Logs Estruturados** *(Serilog + Seq)*  
+  Centralização de logs para diagnóstico rápido em ambientes containerizados.
+
+### 🛡️ Resiliência
+- Políticas de **Retry** na conexão com o banco de dados
+- Tolerância a falhas transientes
+
+### 🐳 Containerização
+- Ambiente totalmente orquestrado via **Docker Compose**:
+  - API
+  - SQL Server
+  - Redis
+  - Jaeger
+  - Seq
+
+### 🧼 Clean Code
+- Uso de **Primary Constructors**
+- **Extension Methods** para configuração de DI (`AppConfiguration`)
+- Separação estrita de responsabilidades entre camadas
+
+---
+
+## Tech Stack
+
+| Categoria | Tecnologias |
+|---------|------------|
+| **Core** | .NET 8, C# 12 |
+| **Arquitetura** | Clean Architecture, RESTful, Dependency Injection |
+| **Banco de Dados** | SQL Server 2022, Entity Framework Core 8 |
+| **Performance** | Redis (StackExchange.Redis), Microsoft.Extensions.Caching |
+| **Observabilidade** | OpenTelemetry, Jaeger, Serilog, Seq |
+| **Documentação** | Swagger / OpenAPI (com suporte a Auth) |
+| **Qualidade** | xUnit, Moq, FluentAssertions, FluentValidation |
+| **DevOps** | Docker, Docker Compose |
+
+---
+
+## Como Rodar o Projeto
+
+A forma **mais simples e profissional** de executar o EventFlow API é utilizando **Docker**, que sobe toda a infraestrutura necessária automaticamente.
+
+### Pré-requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado.
+
+### Passo a Passo
+
+```bash
+git clone https://github.com/alysonsz/eventflow-api.git
+cd eventflow-api
+```
+
+```bash
+docker-compose up -d --build
+```
+
+Aguarde alguns segundos até que todos os containers estejam prontos.
+
+---
+
+## Acesso aos Serviços
+
+| Serviço | URL | Descrição |
+|-------|-----|-----------|
+| **Swagger** | http://localhost:8079/swagger | Documentação e testes da API |
+| **Jaeger UI** | http://localhost:16686 | Tracing e análise de performance |
+| **Seq Logs** | http://localhost:5341 | Logs estruturados em tempo real |
+
+---
+
+## 🧪 Testando a Performance (Cache)
+
+1. Acesse o **Swagger**
+2. Execute `GET /event/{id}` (primeira chamada → SQL Server)
+3. Execute a mesma requisição novamente
+
+**Resultado:**
+- A segunda resposta ocorre em **milissegundos**, pois vem do **Redis**
+
+Vá até o **Jaeger UI** e compare os *spans* das duas requisições.
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+EventFlow API
+├── 📁 EventFlow.Core           # Domínio (Entidades, Interfaces, DTOs)
+├── 📁 EventFlow.Application    # Regras de Negócio (Services, Validations, Cache Logic)
+├── 📁 EventFlow.Infrastructure # Acesso a Dados (EF Core, Repositories, Migrations)
+├── 📁 EventFlow.Presentation   # API (Controllers, Docker, DI Setup)
+└── 📁 EventFlow.Tests          # Testes Unitários (xUnit)
+```
+
+---
+
+## 🔐 Autenticação
+
+A API utiliza **JWT (JSON Web Token)**.
+
+1. Crie uma conta em: `POST /authentication/register`
+2. Faça login em: `POST /authentication/login`
+3. Copie o token retornado
+4. No Swagger, clique em **Authorize** e informe:
+
+```
+SEU_TOKEN
+```
 
 ---
 
 ### 👨‍💻 Autor
 
-- Alyson Souza Carregosa 👨‍💻 Back-end Developer
+Desenvolvido por **Alyson Souza Carregosa**  
+Focado em **Engenharia de Software de Alta Performance**, Arquitetura e Sistemas Observáveis.
 
 ---
 
-### 📝 Licença
+## 📄 Licença
 
-Este projeto está disponível sob a licença MIT.
+Este projeto está licenciado sob a **MIT License**.
+
