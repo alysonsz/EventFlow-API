@@ -1,4 +1,11 @@
 # EventFlow API — Enterprise Event Management
+![.NET 8](https://img.shields.io/badge/.NET%208-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Serilog](https://img.shields.io/badge/Serilog-1cb495?style=for-the-badge&logo=serilog&logoColor=white)
+![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-000000?style=for-the-badge&logo=opentelemetry&logoColor=white)
+![MicrosoftSQLServer](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
 
 O **EventFlow API** é uma solução de back-end **robusta, escalável e orientada a produção** para gestão de eventos, desenvolvida em **.NET 8** e estruturada segundo os princípios da **Clean Architecture**.
 
@@ -29,35 +36,32 @@ graph TD
 
 ## 🌟 Diferenciais Técnicos
 
-### ⚡ Cache Distribuído (Redis)
-- Implementação do padrão **Cache-Aside**
-- Redução significativa de latência em operações de leitura (ex: `GetById`)
-- Estratégias de **invalidação de cache** para garantir consistência dos dados
+### ⚡ Performance & Caching
+- **Redis (Cache-Aside Pattern)**: Implementação estratégica de cache distribuído para reduzir a carga no banco de dados.
+- **Latência Otimizada**: Redução significativa no tempo de resposta em operações de leitura (ex: `GetById`).
+- **Consistência**: Estratégias de invalidação de cache (TTL e remoção ativa) para garantir a integridade dos dados.
 
-### 🔍 Observabilidade Completa
+### 🔍 Observabilidade & Monitoramento
+A aplicação foi projetada para não ser uma "caixa preta" em produção:
+- **Tracing Distribuído (OpenTelemetry + Jaeger)**: Rastreamento ponta-a-ponta (End-to-End) das requisições, permitindo identificar gargalos exatos entre API, Cache e SQL Server.
+- **Logs Estruturados (Serilog + Seq)**: Centralização de logs com enriquecimento de dados, facilitando diagnósticos rápidos em ambiente containerizado.
 
-- **Tracing Distribuído** *(OpenTelemetry + Jaeger)*  
-  Rastreamento ponta-a-ponta das requisições para identificar gargalos entre **API, Cache e Banco de Dados**.
+### 🛡️ Resiliência & Robustez
+- **Políticas de Retry**: Resiliência a falhas transientes na conexão com o banco de dados e serviços externos.
+- **Health Checks**: Monitoramento da saúde dos contêineres e dependências.
 
-- **Logs Estruturados** *(Serilog + Seq)*  
-  Centralização de logs para diagnóstico rápido em ambientes containerizados.
+### 🐳 Infraestrutura como Código (IaC)
+Ambiente de desenvolvimento totalmente orquestrado via **Docker Compose**, subindo instantaneamente:
+- `API (.NET 8)`
+- `SQL Server`
+- `Redis`
+- `Jaeger UI` (Tracing)
+- `Seq` (Logging)
 
-### 🛡️ Resiliência
-- Políticas de **Retry** na conexão com o banco de dados
-- Tolerância a falhas transientes
-
-### 🐳 Containerização
-- Ambiente totalmente orquestrado via **Docker Compose**:
-  - API
-  - SQL Server
-  - Redis
-  - Jaeger
-  - Seq
-
-### 🧼 Clean Code
-- Uso de **Primary Constructors**
-- **Extension Methods** para configuração de DI (`AppConfiguration`)
-- Separação estrita de responsabilidades entre camadas
+### 🧼 Code Quality
+- **Modern C#**: Uso de *Primary Constructors* e *Records*.
+- **Clean Architecture**: Separação estrita de responsabilidades.
+- **DI Otimizada**: Uso de *Extension Methods* para manter a configuração de injeção de dependência limpa e organizada.
 
 ---
 
