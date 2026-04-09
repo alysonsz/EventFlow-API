@@ -1,4 +1,5 @@
 using EventFlow.Presentation.Config;
+using EventFlow.Presentation.Middleware;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,9 +17,13 @@ builder.Services
     .AddRedisCacheConfig()
     .AddOpenTelemetryConfig()
     .AddDependencyInjectionConfig()
-    .AddJwtAuthentication(builder.Configuration);
+    .AddJwtAuthentication(builder.Configuration)
+    .AddRateLimitingConfig()
+    .AddHealthCheckConfig(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseGlobalExceptionHandler();
 
 app.ApplyDatabaseMigrations();
 app.UseSerilogRequestLogging();
@@ -29,10 +34,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+app.MapHealthChecksUI();
 
 try
 {
