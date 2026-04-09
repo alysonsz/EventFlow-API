@@ -18,7 +18,7 @@ public static class ResultExtensions
             : result.Error.ToActionResult();
     }
 
-    private static IActionResult ToActionResult(this Error error)
+    private static ObjectResult ToActionResult(this Error error)
     {
         return error.Type switch
         {

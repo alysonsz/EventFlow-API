@@ -21,7 +21,7 @@ public class RecommendationService(IParticipantRepository participantRepository,
 
         var allParticipants = await _participantRepository.GetAllParticipantsWithEventsAsync();
         var similarParticipants = allParticipants
-            .Where(p => p.Id != participantId && p.Events != null && p.Events.Count(e => participantEventsIds.Contains(e.Id)) > 0)
+            .Where(p => p.Id != participantId && p.Events != null && p.Events.Any(e => participantEventsIds.Contains(e.Id)))
             .ToList();
 
         var recommendedEvents = similarParticipants

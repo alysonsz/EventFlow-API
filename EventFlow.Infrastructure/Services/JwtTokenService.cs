@@ -19,13 +19,7 @@ public class JwtTokenService : IJwtTokenService
     public string GenerateToken(int userId, string username, string email)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var jwtKey = _configuration["Jwt:Key"] 
-            ?? throw new InvalidOperationException("JWT Key is not configured.");
-        
-        if (jwtKey.Length < 32)
-            throw new InvalidOperationException("JWT Key must be at least 32 characters long.");
-        
-        var key = Encoding.ASCII.GetBytes(jwtKey);
+        var key = GetSigningKey();
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -51,13 +45,7 @@ public class JwtTokenService : IJwtTokenService
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var jwtKey = _configuration["Jwt:Key"] 
-            ?? throw new InvalidOperationException("JWT Key is not configured.");
-        
-        if (jwtKey.Length < 32)
-            throw new InvalidOperationException("JWT Key must be at least 32 characters long.");
-        
-        var key = Encoding.ASCII.GetBytes(jwtKey);
+        var key = GetSigningKey();
 
         try
         {
@@ -78,5 +66,16 @@ public class JwtTokenService : IJwtTokenService
         {
             return null;
         }
+    }
+
+    private byte[] GetSigningKey()
+    {
+        var jwtKey = _configuration["Jwt:Key"] 
+            ?? throw new InvalidOperationException("JWT Key is not configured.");
+        
+        if (jwtKey.Length < 32)
+            throw new InvalidOperationException("JWT Key must be at least 32 characters long.");
+        
+        return Encoding.ASCII.GetBytes(jwtKey);
     }
 }

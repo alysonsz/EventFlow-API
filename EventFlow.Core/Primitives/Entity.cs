@@ -48,19 +48,4 @@ public abstract class Entity<TId> : Entity where TId : struct
         return (GetType().ToString() + Id).GetHashCode();
     }
 
-    public static bool operator ==(Entity<TId>? a, Entity<TId>? b)
-    {
-        if (ReferenceEquals(a, b))
-            return true;
-
-        if (a is null || b is null)
-            return false;
-
-        return a.Equals(b);
-    }
-
-    public static bool operator !=(Entity<TId>? a, Entity<TId>? b)
-    {
-        return !(a == b);
-    }
 }
