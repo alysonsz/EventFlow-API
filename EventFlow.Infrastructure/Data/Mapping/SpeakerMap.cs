@@ -11,20 +11,26 @@ public class SpeakerMap : IEntityTypeConfiguration<Speaker>
             .ValueGeneratedOnAdd()
             .UseIdentityColumn();
 
-        builder.Property(x => x.Name)
-            .HasColumnName("Name")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(200);
+        builder.OwnsOne(x => x.Name, name =>
+        {
+            name.Property(n => n.FirstName)
+                .HasColumnName("Name")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(200);
+        });
 
         builder.Property(x => x.Biography)
             .HasColumnName("Biography")
             .HasColumnType("VARCHAR")
             .HasMaxLength(2000);
 
-        builder.Property(x => x.Email)
-            .HasColumnName("Email")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(150);
+        builder.OwnsOne(x => x.Email, email =>
+        {
+            email.Property(e => e.Value)
+                .HasColumnName("Email")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(150);
+        });
 
         builder.Property(x => x.Expertise)
             .HasColumnName("Expertise")

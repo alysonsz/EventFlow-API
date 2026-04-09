@@ -64,16 +64,16 @@ public class EventRepository(EventFlowContext context) : IEventRepository
         {
             var filter = queryParameters.Filter.ToLowerInvariant();
             query = query.Where(e =>
-                e.Title.ToLowerInvariant().Contains(filter) ||
-                e.Location.ToLowerInvariant().Contains(filter)
+                e.Title.Value.ToLower().Contains(filter) ||
+                e.Location.Address.ToLower().Contains(filter)
             );
         }
 
         query = queryParameters.SortBy?.ToLowerInvariant() switch
         {
             "date_desc" => query.OrderByDescending(e => e.Date),
-            "title" => query.OrderBy(e => e.Title),
-            "title_desc" => query.OrderByDescending(e => e.Title),
+            "title" => query.OrderBy(e => e.Title.Value),
+            "title_desc" => query.OrderByDescending(e => e.Title.Value),
             _ => query.OrderBy(e => e.Date)
         };
 

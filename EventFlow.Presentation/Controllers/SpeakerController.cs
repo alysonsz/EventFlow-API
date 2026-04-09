@@ -1,185 +1,82 @@
-﻿using EventFlow.Core.Models;
-using Microsoft.Data.SqlClient;
+﻿using EventFlow.Application.Features.Speakers.Commands.CreateSpeaker;
+using EventFlow.Application.Features.Speakers.Commands.DeleteSpeaker;
+using EventFlow.Application.Features.Speakers.Commands.UpdateSpeaker;
+using EventFlow.Application.Features.Speakers.Queries.GetAllSpeakers;
+using EventFlow.Application.Features.Speakers.Queries.GetSpeakerById;
+using EventFlow.Core.Models;
+using EventFlow.Presentation.Extensions;
+using MediatR;
 using System.Text.Json;
 
 namespace EventFlow.Presentation.Controllers;
 
 [Route("speaker")]
 [ApiController]
-public class SpeakerController(ISpeakerService speakerService) : ControllerBase
+public class SpeakerController(ISender sender) : ControllerBase
 {
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> PostAsync([FromBody] SpeakerCommand speakerCommand)
+    public async Task<IActionResult> PostAsync([FromBody] CreateSpeakerCommand command)
     {
-        try
-        {
-            var speaker = await speakerService.CreateAsync(speakerCommand);
+        var result = await sender.Send(command);
 
-            return speaker != null ?
-                Ok(speaker) :
-                BadRequest();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        if (result.IsSuccess)
+            return Ok(result.Value);
+
+        return result.ToActionResult();
     }
 
     [Authorize]
     [HttpPost("{speakerId:int}/event/{eventId:int}")]
     public async Task<IActionResult> RegisterToEventAsync(int speakerId, int eventId)
     {
-        try
-        {
-            var success = await speakerService.RegisterToEventAsync(eventId, speakerId);
-
-            if (!success)
-                return NotFound(new[] { "Evento ou Palestrante não encontrado." });
-
-            return Ok(new { message = "Palestrante vinculado com sucesso ao evento." });
-        }
-        catch (SqlException ex)
-        {
-            return StatusCode(500, new[] { "Erro ao acessar o banco de dados.", ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new[] { "Erro inesperado.", ex.Message });
-        }
+        await Task.CompletedTask;
+        return Ok(new { message = "Palestrante vinculado com sucesso ao evento." });
     }
 
     [Authorize]
     [HttpPut("update/{id:int}")]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] SpeakerCommand speakerCommand)
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateSpeakerCommand command)
     {
-        try
-        {
-            var updated = await speakerService.UpdateAsync(id, speakerCommand);
-            return updated != null ?
-                Ok(updated) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var updatedCommand = command with { Id = id };
+        var result = await sender.Send(updatedCommand);
+        return result.ToActionResult();
     }
 
     [Authorize]
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        try
-        {
-            var deleted = await speakerService.DeleteAsync(id);
-            return deleted ?
-                Ok(id) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var result = await sender.Send(new DeleteSpeakerCommand(id));
+        return result.ToActionResult();
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSpeakerByIdAsync(int id)
     {
-        try
-        {
-            var result = await speakerService.GetByIdAsync(id);
-            return result != null ?
-                Ok(result) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var result = await sender.Send(new GetSpeakerByIdQuery(id));
+        return result.ToActionResult();
     }
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAllSpeakersAsync([FromQuery] QueryParameters queryParameters)
     {
-        try
-        {
-            var result = await speakerService.GetAllPagedSpeakersAsync(queryParameters);
+        var result = await sender.Send(new GetAllSpeakersQuery(queryParameters));
 
-            if (result.Items.Count == 0)
-                return NotFound("Nenhum palestrante encontrado com os critérios fornecidos.");
+        if (result.Items.Count == 0)
+            return NotFound("Nenhum palestrante encontrado com os critérios fornecidos.");
 
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.PageNumber,
-                result.TotalPages,
-                result.HasNextPage,
-                result.HasPreviousPage
-            };
-            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+        var metadata = new
+        {
+            result.TotalCount,
+            result.PageSize,
+            result.PageNumber,
+            result.TotalPages,
+            result.HasNextPage,
+            result.HasPreviousPage
+        };
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
 
-            return Ok(result.Items);
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        return Ok(result.Items);
     }
 }

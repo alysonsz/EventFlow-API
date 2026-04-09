@@ -48,15 +48,15 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
         {
             var filter = queryParameters.Filter.ToLowerInvariant();
             query = query.Where(p =>
-                p.Name.ToLowerInvariant().Contains(filter) ||
-                p.Email.ToLowerInvariant().Contains(filter)
+                p.Name.FirstName.ToLower().Contains(filter) ||
+                p.Email.Value.ToLower().Contains(filter)
             );
         }
 
         query = queryParameters.SortBy?.ToLowerInvariant() switch
         {
-            "name_desc" => query.OrderByDescending(p => p.Name),
-            _ => query.OrderBy(p => p.Name) 
+            "name_desc" => query.OrderByDescending(p => p.Name.FirstName),
+            _ => query.OrderBy(p => p.Name.FirstName) 
         };
 
         var totalCount = await query.CountAsync();
@@ -73,6 +73,22 @@ public class ParticipantRepository(EventFlowContext context) : IParticipantRepos
         return await context.Participant
             .Include(p => p.Events)
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Participant>> GetParticipantsWithSharedEventsAsync(int excludeParticipantId, 
+        HashSet<int> eventIds, int take = 50)
+    {
+        if (eventIds.Count == 0)
+            return Enumerable.Empty<Participant>();
+
+        return await context.Participant
+            .AsNoTracking()
+            .Include(p => p.Events)
+            .Where(p => p.Id != excludeParticipantId && 
+                        p.Events.Any(e => eventIds.Contains(e.Id)))
+            .OrderByDescending(p => p.Events.Count(e => eventIds.Contains(e.Id)))
+            .Take(take)
             .ToListAsync();
     }
 

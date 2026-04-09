@@ -1,162 +1,73 @@
-﻿using EventFlow.Core.Models;
-using Microsoft.Data.SqlClient;
+using EventFlow.Application.Features.Events.Commands.CreateEvent;
+using EventFlow.Application.Features.Events.Commands.DeleteEvent;
+using EventFlow.Application.Features.Events.Commands.UpdateEvent;
+using EventFlow.Application.Features.Events.Queries.GetAllEvents;
+using EventFlow.Application.Features.Events.Queries.GetEventById;
+using EventFlow.Core.Models;
+using EventFlow.Presentation.Extensions;
 using System.Text.Json;
 
 namespace EventFlow.Presentation.Controllers;
 
 [Route("event")]
 [ApiController]
-public class EventController(IEventService eventService) : ControllerBase
+public class EventController(IMediator mediator) : ControllerBase
 {
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> PostAsync([FromBody] EventCommand eventCommand)
+    public async Task<IActionResult> Create([FromBody] CreateEventCommand command, CancellationToken cancellationToken)
     {
-        try
-        {
-            var newEvent = await eventService.CreateAsync(eventCommand);
-
-            return newEvent != null ?
-                Ok(newEvent) :
-                BadRequest();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var result = await mediator.Send(command, cancellationToken);
+        
+        if (result.IsSuccess)
+            return CreatedAtAction(nameof(GetById), new { id = result.Value }, null);
+        
+        return result.ToActionResult();
     }
 
     [Authorize]
-    [HttpPut("update/{id:int}")]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] EventCommand eventCommand)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateEventCommand command, CancellationToken cancellationToken)
     {
-        try
-        {
-            var updated = await eventService.UpdateAsync(id, eventCommand);
-            return updated != null ?
-                Ok(updated) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var updatedCommand = command with { Id = id };
+        var result = await mediator.Send(updatedCommand, cancellationToken);
+        return result.ToActionResult();
     }
 
     [Authorize]
-    [HttpDelete("delete/{id:int}")]
-    public async Task<IActionResult> DeleteAsync(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var deleted = await eventService.DeleteAsync(id);
-            return deleted ?
-                Ok(id) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var result = await mediator.Send(new DeleteEventCommand(id), cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetEventByIdAsync(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await eventService.GetByIdAsync(id);
-            return result != null ?
-                Ok(result) :
-                NotFound();
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        var result = await mediator.Send(new GetEventByIdQuery(id), cancellationToken);
+        return result.ToActionResult();
     }
 
-    [HttpGet("all")]
-    public async Task<IActionResult> GetAllEventsAsync([FromQuery] QueryParameters queryParameters)
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] QueryParameters queryParameters, CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await eventService.GetAllPagedEventsAsync(queryParameters);
+        var result = await mediator.Send(new GetAllEventsQuery(queryParameters), cancellationToken);
 
-            if (result.Items.Count == 0)
-                return NotFound();
+        if (result.Items.Count == 0)
+            return NotFound();
 
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.PageNumber,
-                result.TotalPages,
-                result.HasNextPage,
-                result.HasPreviousPage
-            };
-            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
+        var metadata = new
+        {
+            result.TotalCount,
+            result.PageSize,
+            result.PageNumber,
+            result.TotalPages,
+            result.HasNextPage,
+            result.HasPreviousPage
+        };
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metadata));
 
-            return Ok(result.Items);
-        }
-        catch (SqlException error)
-        {
-            return StatusCode(500,
-                new[] { "Não foi possível conectar ao banco de dados, por favor tente mais tarde", error.Message });
-        }
-        catch (DbUpdateException error)
-        {
-            return StatusCode(500,
-                new[] { "Algo de errado aconteceu ao salvar, por favor tente mais tarde", error.Message });
-        }
-        catch (Exception error)
-        {
-            return StatusCode(500,
-                new[] { error.Message });
-        }
+        return Ok(result.Items);
     }
 }

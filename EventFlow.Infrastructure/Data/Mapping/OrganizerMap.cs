@@ -11,15 +11,33 @@ public class OrganizerMap : IEntityTypeConfiguration<Organizer>
             .ValueGeneratedOnAdd()
             .UseIdentityColumn();
 
-        builder.Property(x => x.Name)
-            .HasColumnName("Name")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(200);
+        builder.OwnsOne(x => x.Name, name =>
+        {
+            name.Property(n => n.FirstName)
+                .HasColumnName("FirstName")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(100);
+            
+            name.Property(n => n.LastName)
+                .HasColumnName("LastName")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(100);
+        });
 
-        builder.Property(x => x.Email)
-            .HasColumnName("Email")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(150);
+        builder.OwnsOne(x => x.Email, email =>
+        {
+            email.Property(e => e.Value)
+                .HasColumnName("Email")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(150);
+        });
+
+        builder.Property(x => x.CreatedAt)
+            .IsRequired()
+            .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(x => x.UpdatedAt)
+            .IsRequired(false);
 
         builder
             .HasMany(o => o.Events)

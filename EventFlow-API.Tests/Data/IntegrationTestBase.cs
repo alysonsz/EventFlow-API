@@ -25,7 +25,9 @@ public abstract class IntegrationTestBase : IDisposable
 
     private void SeedData()
     {
-        _context.Organizer.Add(new Organizer { Id = 1, Name = "Organizer Test", Email = "test@test.com" });
+        var organizer = Organizer.Create("Organizer Test", "test@test.com");
+        typeof(Organizer).GetProperty("Id")!.SetValue(organizer, 1);
+        _context.Organizer.Add(organizer);
         _context.SaveChanges();
     }
 
