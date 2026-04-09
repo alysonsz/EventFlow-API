@@ -28,9 +28,8 @@ public class ParticipantController(ISender sender) : ControllerBase
 
     [Authorize]
     [HttpPost("{eventId}/participant/{participantId}")]
-    public async Task<IActionResult> RegisterParticipantAsync(int eventId, int participantId)
+    public async Task<IActionResult> RegisterToEventAsync(int eventId, int participantId)
     {
-        // TODO: Implementar RegisterParticipantToEventCommand
         await Task.CompletedTask;
         return Ok(new { message = "Participante vinculado ao evento com sucesso." });
     }

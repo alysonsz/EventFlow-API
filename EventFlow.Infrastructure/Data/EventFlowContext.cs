@@ -49,7 +49,7 @@ public class EventFlowContext : DbContext
 
         var result = await base.SaveChangesAsync(cancellationToken);
 
-        if (_domainEventDispatcher != null && domainEvents.Any())
+        if (_domainEventDispatcher != null && domainEvents.Count > 0)
         {
             await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
         }

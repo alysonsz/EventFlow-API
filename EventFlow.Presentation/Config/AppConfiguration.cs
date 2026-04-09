@@ -118,11 +118,14 @@ public static class AppConfiguration
         return services;
     }
 
+    private static readonly string[] DatabaseHealthTags = ["db", "sql"];
+    private static readonly string[] RedisHealthTags = ["cache", "redis"];
+
     public static IServiceCollection AddHealthCheckConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHealthChecks()
-            .AddDbContextCheck<EventFlowContext>("database", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, tags: new[] { "db", "sql" })
-            .AddRedis("redis", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded, tags: new[] { "cache", "redis" });
+            .AddDbContextCheck<EventFlowContext>("database", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, tags: DatabaseHealthTags)
+            .AddRedis("redis", failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded, tags: RedisHealthTags);
 
         services.AddHealthChecksUI(options =>
         {

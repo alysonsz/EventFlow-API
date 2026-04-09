@@ -14,14 +14,14 @@ public class RecommendationService(IParticipantRepository participantRepository,
             ? participantWithEvents.Events.Select(e => e.Id).ToHashSet()
             : new HashSet<int>();
 
-        if (!participantEventsIds.Any())
+        if (participantEventsIds.Count == 0)
         {
             return Enumerable.Empty<EventDTO>();
         }
 
         var allParticipants = await _participantRepository.GetAllParticipantsWithEventsAsync();
         var similarParticipants = allParticipants
-            .Where(p => p.Id != participantId && (p.Events?.Any(e => participantEventsIds.Contains(e.Id)) ?? false))
+            .Where(p => p.Id != participantId && p.Events != null && p.Events.Count(e => participantEventsIds.Contains(e.Id)) > 0)
             .ToList();
 
         var recommendedEvents = similarParticipants
@@ -42,7 +42,7 @@ public class RecommendationService(IParticipantRepository participantRepository,
             ? participantWithEvents.Events.Select(e => e.Id).ToHashSet()
             : new HashSet<int>();
 
-        if (!participantEventsIds.Any())
+        if (participantEventsIds.Count == 0)
         {
             return Enumerable.Empty<object>();
         }

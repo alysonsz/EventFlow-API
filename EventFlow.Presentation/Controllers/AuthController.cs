@@ -65,7 +65,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     [Authorize]
     [HttpPut("change-password")]
-    public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordUpdateDTO dto)
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordUpdateDto dto)
     {
         try
         {

@@ -1,10 +1,12 @@
 ﻿namespace EventFlow.Presentation.Controllers;
 
 [ApiController]
-public class HomeController : ControllerBase
+[Route("[controller]")]
+public sealed class HomeController : ControllerBase
 {
-    [HttpGet("/")]
-    public IActionResult Home()
+    [HttpGet]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    public IActionResult Index()
     {
         return Ok(new { message = "ok" });
     }

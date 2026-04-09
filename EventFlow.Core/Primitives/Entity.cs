@@ -50,7 +50,7 @@ public abstract class Entity<TId> : Entity where TId : struct
 
     public static bool operator ==(Entity<TId>? a, Entity<TId>? b)
     {
-        if (a is null && b is null)
+        if (ReferenceEquals(a, b))
             return true;
 
         if (a is null || b is null)

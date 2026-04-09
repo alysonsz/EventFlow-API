@@ -18,7 +18,9 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!_validators.Any())
+        if (_validators is ICollection<IValidator<TRequest>> validatorCollection 
+            ? validatorCollection.Count == 0 
+            : !_validators.Any())
         {
             return await next();
         }
@@ -32,7 +34,7 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
             .Where(f => f != null)
             .ToList();
 
-        if (failures.Any())
+        if (failures.Count > 0)
         {
             throw new ValidationException(failures);
         }

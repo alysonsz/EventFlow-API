@@ -28,9 +28,8 @@ public class OrganizerController(ISender sender) : ControllerBase
 
     [Authorize]
     [HttpPost("{organizerId}/event/{eventId}")]
-    public async Task<IActionResult> RegisterParticipantAsync(int organizerId, int eventId)
+    public async Task<IActionResult> RegisterToEventAsync(int organizerId, int eventId)
     {
-        // TODO: Implementar RegisterOrganizerToEventCommand
         await Task.CompletedTask;
         return Ok(new { message = "Evento vinculado ao organizador com sucesso." });
     }

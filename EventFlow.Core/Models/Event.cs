@@ -7,8 +7,8 @@ public class Event : Entity<int>
     public DateTime Date { get; private set; }
     public EventLocation Location { get; private set; } = null!;
     public int OrganizerId { get; private set; }
-    public Organizer? Organizer { get; private set; }
-    public string? Category { get; private set; }
+    public Organizer? Organizer { get; init; }
+    public string? Category { get; init; }
     public ICollection<SpeakerEvent> SpeakerEvents { get; private set; } = [];
     public ICollection<Participant> Participants { get; private set; } = [];
     public DateTime CreatedAt { get; private set; }

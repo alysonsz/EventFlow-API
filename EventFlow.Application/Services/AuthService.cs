@@ -57,7 +57,7 @@ public class AuthService(
         };
     }
 
-    public async Task<bool> UpdatePasswordAsync(ClaimsPrincipal userClaims, UserPasswordUpdateDTO dto)
+    public async Task<bool> UpdatePasswordAsync(ClaimsPrincipal userClaims, UserPasswordUpdateDto dto)
     {
         var email = userClaims.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email)) return false;
