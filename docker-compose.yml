@@ -1,7 +1,7 @@
 ﻿services:
   eventflow-api:
     container_name: eventflow-api
-    image: alysonsz/eventflow-api:v1.0.0
+    image: alysonsz/eventflow-api:v2.0.0
     ports:
       - "8079:8079"
     environment:
