@@ -1,6 +1,10 @@
 ﻿global using AutoMapper;
-global using EventFlow.Core.Commands;
+global using EventFlow.Application.Abstractions;
+global using EventFlow.Application.Behaviors;
+global using EventFlow.Application.Commands;
+global using EventFlow.Application.DTOs;
+global using EventFlow.Application.Services;
 global using EventFlow.Core.Models;
-global using EventFlow.Core.Repository.Interfaces;
-global using EventFlow.Core.Services.Interfaces;
+global using EventFlow.Core.Repository;
 global using FluentValidation;
+global using MediatR;

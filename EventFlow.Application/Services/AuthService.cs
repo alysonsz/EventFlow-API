@@ -1,26 +1,21 @@
-﻿using EventFlow.Core.Models.DTOs;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-
+﻿using System.Security.Claims;
 
 namespace EventFlow.Application.Services;
 
-public class AuthService(IUserRepository userRepository, IConfiguration configuration) : IAuthService
+public class AuthService(
+    IUserRepository userRepository, 
+    IPasswordHasher passwordHasher,
+    IJwtTokenService jwtTokenService) : IAuthService
 {
     public async Task<UserDTO?> RegisterAsync(RegisterUserCommand command)
     {
         if (await userRepository.ExistsByEmailAsync(command.Email))
             return null;
 
-        var user = new User
-        {
-            Username = command.Username,
-            Email = command.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Password)
-        };
+        var user = User.Create(
+            command.Username,
+            command.Email,
+            passwordHasher.HashPassword(command.Password));
 
         await userRepository.AddAsync(user);
 
@@ -36,31 +31,10 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
     {
         var user = await userRepository.GetByEmailAsync(command.Email);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user!.PasswordHash))
+        if (user == null || !passwordHasher.VerifyPassword(command.Password, user!.PasswordHash))
             return null;
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]!);
-
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email)
-            }),
-            Expires = DateTime.UtcNow.AddHours(4),
-            Issuer = configuration["Jwt:Issuer"],
-            Audience = configuration["Jwt:Audience"],
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature
-            )
-        };
-
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        return jwtTokenService.GenerateToken(user.Id, user.Username, user.Email);
     }
 
     public async Task<UserDTO?> GetAuthenticatedUserAsync(ClaimsPrincipal userClaims)
@@ -91,10 +65,10 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
         var entity = await userRepository.GetByEmailAsync(email);
         if (entity == null) return false;
 
-        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, entity.PasswordHash))
+        if (!passwordHasher.VerifyPassword(dto.CurrentPassword, entity.PasswordHash))
             return false;
 
-        entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        entity.UpdatePassword(passwordHasher.HashPassword(dto.NewPassword));
 
         await userRepository.UpdateAsync(entity);
         return true;
