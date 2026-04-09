@@ -1,5 +1,6 @@
-﻿global using EventFlow.Core.Commands;
-global using EventFlow.Core.Services.Interfaces;
-global using Microsoft.EntityFrameworkCore;
+﻿global using EventFlow.Application.Commands;
+global using EventFlow.Application.Services;
+global using MediatR;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;

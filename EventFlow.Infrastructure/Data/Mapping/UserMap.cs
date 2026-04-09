@@ -20,12 +20,16 @@ public class UserMap : IEntityTypeConfiguration<User>
             .HasColumnType("VARCHAR")
             .HasMaxLength(100);
 
-        builder.Property(u => u.Email)
-            .IsRequired()
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(150);
+        builder.OwnsOne(u => u.Email, email =>
+        {
+            email.Property(e => e.Value)
+                .HasColumnName("Email")
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(150);
+        });
 
-        builder.HasIndex(u => u.Email)
+        builder.HasIndex("Email")
             .IsUnique();
 
         builder.Property(u => u.PasswordHash)
@@ -34,6 +38,9 @@ public class UserMap : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.CreatedAt)
             .IsRequired()
-            .HasDefaultValueSql("GETDATE()"); 
+            .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(u => u.LastLoginAt)
+            .IsRequired(false);
     }
 }

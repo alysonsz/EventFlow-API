@@ -52,15 +52,15 @@ public class SpeakerRepository(EventFlowContext context) : ISpeakerRepository
         {
             var filter = queryParameters.Filter.ToLowerInvariant();
             query = query.Where(s =>
-                s.Name.ToLowerInvariant().Contains(filter) ||
-                s.Email.ToLowerInvariant().Contains(filter)
+                s.Name.FirstName.ToLower().Contains(filter) ||
+                s.Email.Value.ToLower().Contains(filter)
             );
         }
 
         query = queryParameters.SortBy?.ToLowerInvariant() switch
         {
-            "name_desc" => query.OrderByDescending(s => s.Name),
-            _ => query.OrderBy(s => s.Name)
+            "name_desc" => query.OrderByDescending(s => s.Name.FirstName),
+            _ => query.OrderBy(s => s.Name.FirstName)
         };
 
         var totalCount = await query.CountAsync();

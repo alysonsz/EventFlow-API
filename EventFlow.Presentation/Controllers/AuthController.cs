@@ -1,11 +1,11 @@
-﻿using EventFlow.Core.Models.DTOs;
+﻿using EventFlow.Application.DTOs;
 using Microsoft.Data.SqlClient;
 
 namespace EventFlow.Presentation.Controllers;
 
 [Route("authentication")]
 [ApiController]
-public class AuthController(IAuthService authService) : Controller
+public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
@@ -65,7 +65,7 @@ public class AuthController(IAuthService authService) : Controller
 
     [Authorize]
     [HttpPut("change-password")]
-    public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordUpdateDTO dto)
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] UserPasswordUpdateDto dto)
     {
         try
         {
