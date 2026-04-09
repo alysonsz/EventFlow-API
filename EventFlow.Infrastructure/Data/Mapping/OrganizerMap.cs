@@ -14,9 +14,14 @@ public class OrganizerMap : IEntityTypeConfiguration<Organizer>
         builder.OwnsOne(x => x.Name, name =>
         {
             name.Property(n => n.FirstName)
-                .HasColumnName("Name")
+                .HasColumnName("FirstName")
                 .HasColumnType("VARCHAR")
-                .HasMaxLength(200);
+                .HasMaxLength(100);
+            
+            name.Property(n => n.LastName)
+                .HasColumnName("LastName")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(100);
         });
 
         builder.OwnsOne(x => x.Email, email =>

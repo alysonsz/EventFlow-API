@@ -110,13 +110,14 @@ public class Event : Entity<int>
 public class EventDateMustBeInFutureRule : IBusinessRule
 {
     private readonly DateTime _date;
+    private static readonly TimeSpan ClockSkew = TimeSpan.FromMinutes(5);
 
     public EventDateMustBeInFutureRule(DateTime date)
     {
         _date = date;
     }
 
-    public bool IsBroken() => _date < DateTime.Now.AddHours(-1);
+    public bool IsBroken() => _date < DateTime.UtcNow.Subtract(ClockSkew);
     public string Message => "Event date must be in the future";
 }
 

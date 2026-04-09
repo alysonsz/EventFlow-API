@@ -48,9 +48,9 @@ public class GetParticipantsByEventIdQueryHandler : IRequestHandler<GetParticipa
 
         var result = new PagedResult<ParticipantDTO>(
             dtos,
-            pagedResult.TotalCount,
             request.QueryParameters.PageNumber,
-            request.QueryParameters.PageSize);
+            request.QueryParameters.PageSize,
+            pagedResult.TotalCount);
 
         await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(3));
         _logger.LogInformation("Cached participants of event {EventId} page {PageNumber} for 3 minutes", request.EventId, request.QueryParameters.PageNumber);

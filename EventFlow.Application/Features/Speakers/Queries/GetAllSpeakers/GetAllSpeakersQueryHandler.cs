@@ -45,9 +45,9 @@ public class GetAllSpeakersQueryHandler : IRequestHandler<GetAllSpeakersQuery, P
 
         var result = new PagedResult<SpeakerDTO>(
             dtos,
-            pagedResult.TotalCount,
             request.QueryParameters.PageNumber,
-            request.QueryParameters.PageSize);
+            request.QueryParameters.PageSize,
+            pagedResult.TotalCount);
 
         await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
         _logger.LogInformation("Cached speakers page {PageNumber} for 5 minutes", request.QueryParameters.PageNumber);

@@ -7,5 +7,4 @@ public record UpdateEventCommand(
     string Title,
     string? Description,
     DateTime Date,
-    string Location,
-    int OrganizerId) : ICommand<Result>;
+    string Location) : ICommand<Result>;

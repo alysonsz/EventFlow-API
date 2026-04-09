@@ -41,7 +41,7 @@ public class Result<T> : Result
     public static Result<T> Success(T value) => new(value, true, Error.None);
     public new static Result<T> Failure(Error error) => new(default, false, error);
     
-    public static implicit operator Result<T>(T? value) => value is not null ? Success(value) : Failure(Error.None);
+    public static implicit operator Result<T>(T? value) => value is not null ? Success(value) : Failure(Error.NullValue());
     public static implicit operator Result<T>(Error error) => Failure(error);
     
     public TResult Map<TResult>(Func<T, TResult> onSuccess, Func<Error, TResult> onFailure)

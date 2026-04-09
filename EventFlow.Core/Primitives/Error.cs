@@ -32,6 +32,9 @@ public readonly record struct Error
     
     public static Error Forbidden(string code, string message) => 
         new(code, message, ErrorType.Forbidden);
+    
+    public static Error NullValue(string? code = null, string? message = null) => 
+        new(code ?? "General.Null", message ?? "Value cannot be null", ErrorType.Failure);
 }
 
 public enum ErrorType

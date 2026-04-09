@@ -35,7 +35,7 @@ public class RecommendationService(IParticipantRepository participantRepository,
         return _mapper.Map<IEnumerable<EventDTO>>(recommendedEvents);
     }
 
-    public async Task<IEnumerable<object>> GetRecommendedConnectionsAsync(int participantId)
+    public async Task<IEnumerable<ParticipantDTO>> GetRecommendedConnectionsAsync(int participantId)
     {
         var participantWithEvents = await _participantRepository.GetParticipantByIdAsync(participantId);
         var participantEventsIds = (participantWithEvents?.Events != null)
@@ -44,7 +44,7 @@ public class RecommendationService(IParticipantRepository participantRepository,
 
         if (participantEventsIds.Count == 0)
         {
-            return Enumerable.Empty<object>();
+            return Enumerable.Empty<ParticipantDTO>();
         }
 
         var allParticipants = await _participantRepository.GetAllParticipantsWithEventsAsync();

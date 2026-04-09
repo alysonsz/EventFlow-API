@@ -54,7 +54,7 @@ public class EventControllerTests
     [Fact]
     public async Task Update_ReturnsOk_WhenUpdated()
     {
-        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location");
         var result = Result.Success();
 
         _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
@@ -67,7 +67,7 @@ public class EventControllerTests
     [Fact]
     public async Task Update_ReturnsNotFound_WhenEventNotFound()
     {
-        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location");
         var result = Result.Failure(Error.NotFound("Event.NotFound", "Event not found"));
 
         _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
