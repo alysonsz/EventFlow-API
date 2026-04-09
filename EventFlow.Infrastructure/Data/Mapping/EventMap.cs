@@ -11,10 +11,13 @@ public class EventMap : IEntityTypeConfiguration<Event>
             .ValueGeneratedOnAdd()
             .UseIdentityColumn();
 
-        builder.Property(x => x.Title)
-            .HasColumnName("Title")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(200);
+        builder.OwnsOne(x => x.Title, title =>
+        {
+            title.Property(t => t.Value)
+                .HasColumnName("Title")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(200);
+        });
 
         builder.Property(x => x.Description)
             .HasColumnName("Description")
@@ -25,10 +28,13 @@ public class EventMap : IEntityTypeConfiguration<Event>
             .HasColumnName("Date")
             .HasColumnType("DATETIME");
 
-        builder.Property(x => x.Location)
-            .HasColumnName("Location")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(150);
+        builder.OwnsOne(x => x.Location, location =>
+        {
+            location.Property(l => l.Address)
+                .HasColumnName("Location")
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(300);
+        });
 
         builder.Property(x => x.OrganizerId)
             .HasColumnName("OrganizerId")

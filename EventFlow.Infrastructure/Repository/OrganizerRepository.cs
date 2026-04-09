@@ -50,15 +50,15 @@ public class OrganizerRepository(EventFlowContext context) : IOrganizerRepositor
         {
             var filter = queryParameters.Filter.ToLowerInvariant();
             query = query.Where(o =>
-                o.Name.ToLowerInvariant().Contains(filter) ||
-                o.Email.ToLowerInvariant().Contains(filter)
+                o.Name.FirstName.ToLower().Contains(filter) ||
+                o.Email.Value.ToLower().Contains(filter)
             );
         }
 
         query = queryParameters.SortBy?.ToLowerInvariant() switch
         {
-            "name_desc" => query.OrderByDescending(o => o.Name),
-            _ => query.OrderBy(o => o.Name)
+            "name_desc" => query.OrderByDescending(o => o.Name.FirstName),
+            _ => query.OrderBy(o => o.Name.FirstName)
         };
 
         var totalCount = await query.CountAsync();

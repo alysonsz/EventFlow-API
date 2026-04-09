@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EventFlow.Core.Models.DTOs;
+using EventFlow.Application.DTOs;
 
 namespace EventFlow.Infrastructure.Profiles;
 

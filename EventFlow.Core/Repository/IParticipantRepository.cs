@@ -1,4 +1,4 @@
-﻿namespace EventFlow.Core.Repository.Interfaces;
+namespace EventFlow.Core.Repository;
 
 public interface IParticipantRepository
 {
