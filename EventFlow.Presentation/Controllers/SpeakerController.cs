@@ -31,7 +31,7 @@ public class SpeakerController(ISender sender) : ControllerBase
     public async Task<IActionResult> RegisterToEventAsync(int speakerId, int eventId)
     {
         // TODO: Implementar RegisterSpeakerToEventCommand
-        // Por enquanto mantendo retorno de sucesso ou pode ser implementado depois
+        await Task.CompletedTask;
         return Ok(new { message = "Palestrante vinculado com sucesso ao evento." });
     }
 

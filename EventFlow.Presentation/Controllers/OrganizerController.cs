@@ -31,7 +31,7 @@ public class OrganizerController(ISender sender) : ControllerBase
     public async Task<IActionResult> RegisterParticipantAsync(int organizerId, int eventId)
     {
         // TODO: Implementar RegisterOrganizerToEventCommand
-        // Por enquanto mantendo o service call ou pode ser implementado depois
+        await Task.CompletedTask;
         return Ok(new { message = "Evento vinculado ao organizador com sucesso." });
     }
 

@@ -31,7 +31,7 @@ public class ParticipantController(ISender sender) : ControllerBase
     public async Task<IActionResult> RegisterParticipantAsync(int eventId, int participantId)
     {
         // TODO: Implementar RegisterParticipantToEventCommand
-        // Por enquanto mantendo retorno de sucesso ou pode ser implementado depois
+        await Task.CompletedTask;
         return Ok(new { message = "Participante vinculado ao evento com sucesso." });
     }
 
