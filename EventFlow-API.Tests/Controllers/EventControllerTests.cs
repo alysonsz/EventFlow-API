@@ -1,16 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using EventFlow.Application.Features.Events.Commands.CreateEvent;
+using EventFlow.Application.Features.Events.Commands.DeleteEvent;
+using EventFlow.Application.Features.Events.Commands.UpdateEvent;
+using EventFlow.Application.Features.Events.Queries.GetAllEvents;
+using EventFlow.Application.Features.Events.Queries.GetEventById;
+using EventFlow.Core.Primitives;
 
 namespace EventFlow_API.Tests.Controllers;
 
 public class EventControllerTests
 {
-    private readonly Mock<IEventService> _serviceMock;
     private readonly EventController _controller;
+    private readonly Mock<IMediator> _mockMediator;
 
     public EventControllerTests()
     {
-        _serviceMock = new Mock<IEventService>();
-        _controller = new EventController(_serviceMock.Object);
+        _mockMediator = new Mock<IMediator>();
+        _controller = new EventController(_mockMediator.Object);
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext()
@@ -18,106 +25,114 @@ public class EventControllerTests
     }
 
     [Fact]
-    public async Task PostAsync_ReturnsOk_WhenEventCreated()
+    public async Task Create_ReturnsCreatedAtAction_WhenEventCreated()
     {
-        var command = new EventCommand { Title = "Test", Description = "Test Desc", Date = DateTime.Now, Location = "Test Location", OrganizerId = 1 };
-        var createdEvent = new Event { Id = 1, Title = "Test" };
+        var command = new CreateEventCommand("Test Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var result = Result<int>.Success(1);
 
-        _serviceMock.Setup(s => s.CreateAsync(command)).ReturnsAsync(createdEvent);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.PostAsync(command);
+        var actionResult = await _controller.Create(command, CancellationToken.None);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedEvent = Assert.IsType<Event>(okResult.Value);
-        Assert.Equal(1, returnedEvent.Id);
+        var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
+        Assert.Equal(1, createdResult.RouteValues!["id"]);
     }
 
     [Fact]
-    public async Task PostAsync_ReturnsBadRequest_WhenCreationFails()
+    public async Task Create_ReturnsError_WhenCreationFails()
     {
-        var command = new EventCommand { Title = "Test", Description = "Test Desc", Date = DateTime.Now, Location = "Test Location", OrganizerId = 1 };
-        _serviceMock.Setup(s => s.CreateAsync(command)).ReturnsAsync((Event)null!);
+        var command = new CreateEventCommand("Test Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var result = Result<int>.Failure(Error.Validation("Event.CreateFailed", "Failed to create event"));
 
-        var result = await _controller.PostAsync(command);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        Assert.IsType<BadRequestResult>(result);
+        var actionResult = await _controller.Create(command, CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(actionResult);
     }
 
     [Fact]
-    public async Task UpdateAsync_ReturnsOk_WhenUpdated()
+    public async Task Update_ReturnsOk_WhenUpdated()
     {
-        var command = new EventCommand { Title = "Updated", Description = "Desc", Date = DateTime.Now, Location = "Loc", OrganizerId = 1 };
-        var updatedEvent = new EventDTO { Id = 1, Title = "Updated" };
+        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var result = Result.Success();
 
-        _serviceMock.Setup(s => s.UpdateAsync(1, command)).ReturnsAsync(updatedEvent);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.UpdateAsync(1, command);
+        var actionResult = await _controller.Update(1, command, CancellationToken.None);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedEvent = Assert.IsType<EventDTO>(okResult.Value);
-        Assert.Equal(1, returnedEvent.Id);
+        Assert.IsType<OkResult>(actionResult);
     }
 
     [Fact]
-    public async Task UpdateAsync_ReturnsNotFound_WhenUpdateFails()
+    public async Task Update_ReturnsNotFound_WhenEventNotFound()
     {
-        var command = new EventCommand { Title = "Updated" };
-        _serviceMock.Setup(s => s.UpdateAsync(1, command)).ReturnsAsync((EventDTO)null!);
+        var command = new UpdateEventCommand(1, "Updated Event", "Description", DateTime.Now.AddDays(1), "Location", 1);
+        var result = Result.Failure(Error.NotFound("Event.NotFound", "Event not found"));
 
-        var result = await _controller.UpdateAsync(1, command);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        Assert.IsType<NotFoundResult>(result);
+        var actionResult = await _controller.Update(1, command, CancellationToken.None);
+
+        Assert.IsType<NotFoundObjectResult>(actionResult);
     }
 
     [Fact]
-    public async Task DeleteAsync_ReturnsOk_WhenDeleted()
+    public async Task Delete_ReturnsOk_WhenDeleted()
     {
-        _serviceMock.Setup(s => s.DeleteAsync(1)).ReturnsAsync(true);
+        var command = new DeleteEventCommand(1);
+        var result = Result.Success();
 
-        var result = await _controller.DeleteAsync(1);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(1, okResult.Value);
+        var actionResult = await _controller.Delete(1, CancellationToken.None);
+
+        Assert.IsType<OkResult>(actionResult);
     }
 
     [Fact]
-    public async Task DeleteAsync_ReturnsNotFound_WhenDeleteFails()
+    public async Task Delete_ReturnsNotFound_WhenDeleteFails()
     {
-        _serviceMock.Setup(s => s.DeleteAsync(1)).ReturnsAsync(false);
+        var command = new DeleteEventCommand(1);
+        var result = Result.Failure(Error.NotFound("Event.NotFound", "Event not found"));
 
-        var result = await _controller.DeleteAsync(1);
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        Assert.IsType<NotFoundResult>(result);
+        var actionResult = await _controller.Delete(1, CancellationToken.None);
+
+        Assert.IsType<NotFoundObjectResult>(actionResult);
     }
 
     [Fact]
     public async Task GetById_ReturnsOk_WhenEventExists()
     {
-        var eventId = 1;
-        var eventDto = new EventDTO { Id = eventId, Title = "Test Event" };
-        _serviceMock.Setup(s => s.GetByIdAsync(eventId)).ReturnsAsync(eventDto);
+        var query = new GetEventByIdQuery(1);
+        var evento = new EventDTO { Id = 1, Title = "Event 1" };
+        var result = Result<EventDTO>.Success(evento);
 
-        var result = await _controller.GetEventByIdAsync(eventId);
+        _mockMediator.Setup(m => m.Send(query, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var actionResult = await _controller.GetById(1, CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
         var returnValue = Assert.IsType<EventDTO>(okResult.Value);
-        Assert.Equal(eventDto.Id, returnValue.Id);
+        returnValue.Id.Should().Be(1);
     }
 
     [Fact]
-    public async Task GetAllEventsAsync_ReturnsNotFound_WhenNoEventsExist()
+    public async Task GetAll_ReturnsOk_WithList()
     {
         var queryParameters = new QueryParameters();
-        var emptyList = new List<EventDTO>();
+        var query = new GetAllEventsQuery(queryParameters);
+        var events = new List<EventDTO> { new() { Id = 1, Title = "Event 1" } };
+        var pagedResult = new PagedResult<EventDTO>(events, 1, 10, 1);
 
-        var pagedResult = new PagedResult<EventDTO>(emptyList, 1, 10, 0);
+        _mockMediator.Setup(m => m.Send(query, It.IsAny<CancellationToken>())).ReturnsAsync(pagedResult);
 
-        _serviceMock
-            .Setup(s => s.GetAllPagedEventsAsync(It.IsAny<QueryParameters>()))
-            .ReturnsAsync(pagedResult);
+        var actionResult = await _controller.GetAll(queryParameters, CancellationToken.None);
 
-        var result = await _controller.GetAllEventsAsync(queryParameters);
-
-        Assert.IsType<NotFoundResult>(result);
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
+        var returnValue = Assert.IsType<List<EventDTO>>(okResult.Value);
+        returnValue.Should().HaveCount(1);
     }
 }

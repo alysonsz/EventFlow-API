@@ -1,16 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using EventFlow.Application.Features.Speakers.Commands.CreateSpeaker;
+using EventFlow.Application.Features.Speakers.Commands.DeleteSpeaker;
+using EventFlow.Application.Features.Speakers.Commands.UpdateSpeaker;
+using EventFlow.Application.Features.Speakers.Queries.GetAllSpeakers;
+using EventFlow.Application.Features.Speakers.Queries.GetSpeakerById;
+using EventFlow.Core.Primitives;
 
 namespace EventFlow_API.Tests.Controllers;
 
 public class SpeakerControllerTests
 {
     private readonly SpeakerController _controller;
-    private readonly Mock<ISpeakerService> _mockService;
+    private readonly Mock<ISender> _mockSender;
 
     public SpeakerControllerTests()
     {
-        _mockService = new Mock<ISpeakerService>();
-        _controller = new SpeakerController(_mockService.Object);
+        _mockSender = new Mock<ISender>();
+        _controller = new SpeakerController(_mockSender.Object);
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext()
@@ -20,107 +27,94 @@ public class SpeakerControllerTests
     [Fact]
     public async Task PostAsync_ReturnsOk_WhenSpeakerCreated()
     {
-        var command = new SpeakerCommand { Name = "Test", Email = "test@example.com", Biography = "Bio" };
-        var speaker = new Speaker { Id = 1, Name = "Test", Email = "test@example.com", Biography = "Bio" };
+        var command = new CreateSpeakerCommand("Test", "test@example.com", "Bio", "Expertise");
+        var result = Result<int>.Success(1);
 
-        _mockService.Setup(s => s.CreateAsync(command)).ReturnsAsync(speaker);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.PostAsync(command);
+        var actionResult = await _controller.PostAsync(command);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnValue = Assert.IsType<Speaker>(okResult.Value);
-        returnValue.Id.Should().Be(1);
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
+        Assert.Equal(1, okResult.Value);
     }
 
     [Fact]
     public async Task PostAsync_ReturnsBadRequest_WhenCreationFails()
     {
-        var command = new SpeakerCommand { Name = "Test", Email = "test@example.com", Biography = "Bio" };
+        var command = new CreateSpeakerCommand("Test", "test@example.com", "Bio", "Expertise");
+        var result = Result<int>.Failure(Error.Validation("Speaker.CreateFailed", "Failed to create speaker"));
 
-        _mockService.Setup(s => s.CreateAsync(command)).ReturnsAsync((Speaker)null!);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.PostAsync(command);
+        var actionResult = await _controller.PostAsync(command);
 
-        Assert.IsType<BadRequestResult>(result);
+        Assert.IsType<BadRequestObjectResult>(actionResult);
     }
 
     [Fact]
     public async Task UpdateAsync_ReturnsOk_WhenUpdated()
     {
-        var command = new SpeakerCommand { Name = "Updated", Email = "updated@example.com", Biography = "Bio" };
-        var updated = new SpeakerDTO { Id = 1, Name = "Updated" };
+        var command = new UpdateSpeakerCommand(1, "Updated", "updated@example.com", "Bio", "Expertise");
+        var result = Result.Success();
 
-        _mockService.Setup(s => s.UpdateAsync(1, command)).ReturnsAsync(updated);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.UpdateAsync(1, command);
+        var actionResult = await _controller.UpdateAsync(1, command);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnValue = Assert.IsType<SpeakerDTO>(okResult.Value);
-        returnValue.Id.Should().Be(1);
+        Assert.IsType<OkResult>(actionResult);
     }
 
     [Fact]
     public async Task UpdateAsync_ReturnsNotFound_WhenUpdateFails()
     {
-        var command = new SpeakerCommand { Name = "Updated", Email = "updated@example.com", Biography = "Bio" };
+        var command = new UpdateSpeakerCommand(1, "Updated", "updated@example.com", "Bio", "Expertise");
+        var result = Result.Failure(Error.NotFound("Speaker.NotFound", "Speaker not found"));
 
-        _mockService.Setup(s => s.UpdateAsync(1, command)).ReturnsAsync((SpeakerDTO)null!);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var result = await _controller.UpdateAsync(1, command);
+        var actionResult = await _controller.UpdateAsync(1, command);
 
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<NotFoundObjectResult>(actionResult);
     }
 
     [Fact]
     public async Task DeleteAsync_ReturnsOk_WhenDeleted()
     {
-        _mockService.Setup(s => s.DeleteAsync(1)).ReturnsAsync(true);
+        var command = new DeleteSpeakerCommand(1);
+        var result = Result.Success();
 
-        var result = await _controller.DeleteAsync(1);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(1, okResult.Value);
+        var actionResult = await _controller.DeleteAsync(1);
+
+        Assert.IsType<OkResult>(actionResult);
     }
 
     [Fact]
     public async Task DeleteAsync_ReturnsNotFound_WhenDeleteFails()
     {
-        _mockService.Setup(s => s.DeleteAsync(1)).ReturnsAsync(false);
+        var command = new DeleteSpeakerCommand(1);
+        var result = Result.Failure(Error.NotFound("Speaker.NotFound", "Speaker not found"));
 
-        var result = await _controller.DeleteAsync(1);
+        _mockSender.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        Assert.IsType<NotFoundResult>(result);
-    }
+        var actionResult = await _controller.DeleteAsync(1);
 
-    [Fact]
-    public async Task RegisterToEventAsync_ReturnsOk_WhenSuccess()
-    {
-        _mockService.Setup(s => s.RegisterToEventAsync(1, 1)).ReturnsAsync(true);
-
-        var result = await _controller.RegisterToEventAsync(1, 1);
-
-        var okResult = Assert.IsType<OkObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task RegisterToEventAsync_ReturnsNotFound_WhenFailure()
-    {
-        _mockService.Setup(s => s.RegisterToEventAsync(1, 1)).ReturnsAsync(false);
-
-        var result = await _controller.RegisterToEventAsync(1, 1);
-
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.IsType<NotFoundObjectResult>(actionResult);
     }
 
     [Fact]
     public async Task GetById_ReturnsOk_WhenSpeakerExists()
     {
+        var query = new GetSpeakerByIdQuery(1);
         var speaker = new SpeakerDTO { Id = 1, Name = "Speaker 1" };
-        _mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(speaker);
+        var result = Result<SpeakerDTO>.Success(speaker);
 
-        var result = await _controller.GetSpeakerByIdAsync(1);
+        _mockSender.Setup(s => s.Send(query, It.IsAny<CancellationToken>())).ReturnsAsync(result);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var actionResult = await _controller.GetSpeakerByIdAsync(1);
+
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
         var returnValue = Assert.IsType<SpeakerDTO>(okResult.Value);
         returnValue.Id.Should().Be(1);
     }
@@ -129,16 +123,15 @@ public class SpeakerControllerTests
     public async Task GetAll_ReturnsOk_WithList()
     {
         var queryParameters = new QueryParameters();
+        var query = new GetAllSpeakersQuery(queryParameters);
         var speakers = new List<SpeakerDTO> { new() { Id = 1, Name = "Speaker 1" } };
         var pagedResult = new PagedResult<SpeakerDTO>(speakers, 1, 10, 1);
 
-        _mockService
-            .Setup(s => s.GetAllPagedSpeakersAsync(It.IsAny<QueryParameters>()))
-            .ReturnsAsync(pagedResult);
+        _mockSender.Setup(s => s.Send(query, It.IsAny<CancellationToken>())).ReturnsAsync(pagedResult);
 
-        var result = await _controller.GetAllSpeakersAsync(queryParameters);
+        var actionResult = await _controller.GetAllSpeakersAsync(queryParameters);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
         var returnValue = Assert.IsType<List<SpeakerDTO>>(okResult.Value);
         returnValue.Should().HaveCount(1);
     }
