@@ -1,0 +1,11 @@
+﻿[
+  {
+    "Name": "Backend",
+    "Projects": [
+      {
+        "Path": "EventNucleus.Presentation\\EventNucleus.Presentation.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
